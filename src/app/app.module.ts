@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import { TestComponent } from './components/test/test.component';
+import { CognitoService } from './services/cognito.service';
 
 @NgModule({
   declarations: [
@@ -12,7 +13,9 @@ import { TestComponent } from './components/test/test.component';
   imports: [
     BrowserModule
   ],
-  providers: [],
+  providers: [
+    CognitoService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
