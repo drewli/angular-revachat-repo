@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as AWSCognito from 'amazon-cognito-identity-js';
+// import { CognitoAuth } from 'amazon-cognito-auth-js';
 import { BehaviorSubject } from 'rxjs';
+import { CognitoAuth } from 'amazon-cognito-auth-js';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +21,16 @@ export class CognitoService {
     };
 
     this.userPool = new AWSCognito.CognitoUserPool(poolData);
+
+    const authData = {
+      ClientId : '1mk39hkeguvcmkdkmobcg5e40m', // Your client id here
+      AppWebDomain : 'https://revachat-domain-1.auth.us-east-2.amazoncognito.com',
+      TokenScopesArray : ['email', 'preferred_username'], // e.g.['phone', 'email', 'profile','openid', 'aws.cognito.signin.user.admin'],
+      RedirectUriSignIn : 'http://angular-revachat-s3-bucket.s3-website-us-east-1.amazonaws.com',
+      RedirectUriSignOut : 'http://angular-revachat-s3-bucket.s3-website-us-east-1.amazonaws.com',
+      UserPoolId : 'us-east-2_jgehXhpp7', // Your user pool id here
+    };
+    const auth = new CognitoAuth(authData);
   }
 
   createUser(email: string, username: string, password: string) {
@@ -56,6 +68,5 @@ export class CognitoService {
       console.log('[LOG] - Created cognito user');
     });
   }
-
 
 }
