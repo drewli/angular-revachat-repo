@@ -13,6 +13,7 @@ phases:
     post_build:
          commands:
             - aws s3 sync --delete dist/angular-revachat s3://angular-revachat-s3-bucket
+            - aws s3 sync --delete dist/angular-revachat s3://project-2-bucket-bwalker
             - echo Build completed on `date`
 artifacts:
     files:
