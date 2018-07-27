@@ -10,6 +10,7 @@ import { CognitoAuth } from 'amazon-cognito-auth-js';
 export class CognitoService {
 
   userStream: BehaviorSubject<AWSCognito.CognitoUser> = new BehaviorSubject<AWSCognito.CognitoUser>(null);
+  auth: CognitoAuth;
 
   private userPool: AWSCognito.CognitoUserPool;
 
@@ -24,13 +25,18 @@ export class CognitoService {
 
     const authData = {
       ClientId : '1mk39hkeguvcmkdkmobcg5e40m', // Your client id here
-      AppWebDomain : 'https://revachat-domain-1.auth.us-east-2.amazoncognito.com',
+      AppWebDomain : 'revachat-domain-1.auth.us-east-2.amazoncognito.com',
       TokenScopesArray : ['email', 'preferred_username'], // e.g.['phone', 'email', 'profile','openid', 'aws.cognito.signin.user.admin'],
-      RedirectUriSignIn : 'http://angular-revachat-s3-bucket.s3-website-us-east-1.amazonaws.com',
-      RedirectUriSignOut : 'http://angular-revachat-s3-bucket.s3-website-us-east-1.amazonaws.com',
+      RedirectUriSignIn : 'https://angular-revachat-s3-bucket.s3-website-us-east-1.amazonaws.com',
+      RedirectUriSignOut : 'https://angular-revachat-s3-bucket.s3-website-us-east-1.amazonaws.com',
       UserPoolId : 'us-east-2_jgehXhpp7', // Your user pool id here
     };
-    const auth = new CognitoAuth(authData);
+    this.auth = new CognitoAuth(authData);
+  }
+
+  login(){
+    console.log('[LOG] - In CognitoService.login()');
+    this.auth.getSession();
   }
 
   createUser(email: string, username: string, password: string) {
