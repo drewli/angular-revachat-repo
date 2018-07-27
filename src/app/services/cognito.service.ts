@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as AWSCognito from 'amazon-cognito-identity-js';
 // import { CognitoAuth } from 'amazon-cognito-auth-js';
 import { BehaviorSubject } from 'rxjs';
-import { CognitoAuth } from 'amazon-cognito-auth-js';
+import { CognitoAuthSession } from 'amazon-cognito-auth-js';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +10,6 @@ import { CognitoAuth } from 'amazon-cognito-auth-js';
 export class CognitoService {
 
   userStream: BehaviorSubject<AWSCognito.CognitoUser> = new BehaviorSubject<AWSCognito.CognitoUser>(null);
-  auth: CognitoAuth;
 
   private userPool: AWSCognito.CognitoUserPool;
 
@@ -23,20 +22,6 @@ export class CognitoService {
 
     this.userPool = new AWSCognito.CognitoUserPool(poolData);
 
-    const authData = {
-      ClientId : '1mk39hkeguvcmkdkmobcg5e40m', // Your client id here
-      AppWebDomain : 'revachat-domain-1.auth.us-east-2.amazoncognito.com',
-      TokenScopesArray : ['email', 'preferred_username'], // e.g.['phone', 'email', 'profile','openid', 'aws.cognito.signin.user.admin'],
-      RedirectUriSignIn : 'https://angular-revachat-s3-bucket.s3-website-us-east-1.amazonaws.com',
-      RedirectUriSignOut : 'https://angular-revachat-s3-bucket.s3-website-us-east-1.amazonaws.com',
-      UserPoolId : 'us-east-2_jgehXhpp7', // Your user pool id here
-    };
-    this.auth = new CognitoAuth(authData);
-  }
-
-  login(){
-    console.log('[LOG] - In CognitoService.login()');
-    this.auth.getSession();
   }
 
   createUser(email: string, username: string, password: string) {
@@ -75,4 +60,34 @@ export class CognitoService {
     });
   }
 
+  signIn(email: string, password: string) {
+    const userData = {
+      Username: email,
+      Pool: this.userPool
+    };
+
+    const authenticationData = {
+      Username: email,
+      Password: password
+    };
+
+    const authenticationDetails = new AWSCognito.AuthenticationDetails(authenticationData);
+
+    const cognitoUser = new AWSCognito.CognitoUser(userData);
+
+    let accessToken;
+
+    cognitoUser.authenticateUser(authenticationDetails, {
+      onSuccess: function(session: AWSCognito.CognitoUserSession) {
+        accessToken = session.getAccessToken().getJwtToken();
+        console.log(accessToken);
+        // cognitoUser.getUserAttributes(function(callBack){
+        //   console.log(callBack.message);
+        // });
+      },
+      onFailure: function(err: any) {
+        console.log('onFailure');
+      }
+    });
+  }
 }
