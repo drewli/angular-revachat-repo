@@ -1,0 +1,45 @@
+<div class="container row" >
+  <div class="col-md-8"></div>
+
+  <div class="col-md-4 col-md-offset-4">
+    <h3>Register</h3>
+
+    <form>
+      <div class="form-group">
+        <label for="fn">First name</label>
+        <input type="text" [(ngModel)]="this.user.firstName" (blur)="validate()"
+          class="form-control" id="fn" placeholder="Enter your first name" name="fn">
+      </div>
+
+      <div class="form-group">
+        <label for="ln">Last name</label>
+        <input type="text" [(ngModel)]="this.user.lastName" (blur)="validate()"
+          class="form-control" id="ln" placeholder="Enter your last name" name="ln">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" [(ngModel)]="this.user.email" (blur)="validate()"
+          class="form-control" id="email" placeholder="Enter your email address" name="email">
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" [(ngModel)]="this.user.username" (blur)="validate()"
+          class="form-control" id="username" placeholder="Enter your desired username" name="usr">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" [(ngModel)]="this.password" (blur)="validate()" (keyup)="validate()"
+          class="form-control" id="password" placeholder="Enter your password" name="pw">
+      </div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="!isValid" (click)="register()">Register</button>
+      <br> <br>
+
+      <div *ngIf="message" class="alert alert-danger">{{message}}</div>
+      <div *ngIf="registered" class="alert alert-info">Your account has been created and a verification email has been sent to your address. Please click the link in the email to verify your account and login.</div>
+    </form>
+  </div>
+</div>
