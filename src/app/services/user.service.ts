@@ -19,7 +19,7 @@ const HTTP_OPTIONS = {
 export class UserService {
 
   subscribers: BehaviorSubject<User> = new BehaviorSubject<User>(null);
-  users: User[];
+  users: User[] = [];
 
   constructor(private cognitoService: CognitoService, private http: HttpClient) {
     this.loadUsers();
@@ -27,9 +27,9 @@ export class UserService {
 
   loadUsers() {
     console.log('In UserService.loadUsers()');
-    this.http.get<User[]>(environment.apiUrl + 'users', HTTP_OPTIONS).subscribe(users => {
-      this.users = users;
-    });
+    // this.http.get<User[]>(environment.apiUrl + 'users', HTTP_OPTIONS).subscribe(users => {
+    //   this.users = users;
+    // });
   }
 
   registerCognito(user: User, password: string) {
@@ -62,12 +62,11 @@ export class UserService {
 
   getAllUsers() {
     console.log('In UserService.getAllUsers()');
-    const json = '';
-    return this.http.post<User[]>(environment.apiUrl + 'allUsers.loadinfo', json, HTTP_OPTIONS);
+    return this.http.get<User[]>(environment.apiUrl + 'users', HTTP_OPTIONS);
   }
 
-  isUsernameAvailable(usr: string) {
-    const json = JSON.stringify(usr);
-    return this.http.post<string>(environment.apiUrl + 'username.validate', json, HTTP_OPTIONS);
-  }
+  // isUsernameAvailable(usr: string) {
+  //   const json = JSON.stringify(usr);
+  //   return this.http.post<string>(environment.apiUrl + 'username.validate', json, HTTP_OPTIONS);
+  // }
 }
