@@ -21,6 +21,9 @@ import { LandingComponent } from './components/landing/landing.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { ChatComponent } from './components/chat/chat.component';
 import { SocketService } from './services/socket.service';
+import { ChannelMenuComponent } from './components/channel-menu/channel-menu.component';
+import { UserService } from './services/user.service';
+import { ChannelService } from './services/channel.service';
 
 @NgModule({
   declarations: [
@@ -30,7 +33,8 @@ import { SocketService } from './services/socket.service';
     RegisterComponent,
     LandingComponent,
     NavbarComponent,
-    ChatComponent
+    ChatComponent,
+    ChannelMenuComponent
   ],
   imports: [
     BrowserModule,
@@ -46,7 +50,9 @@ import { SocketService } from './services/socket.service';
   ],
   providers: [
     CognitoService,
-    SocketService
+    SocketService,
+    UserService,
+    ChannelService
   ],
   bootstrap: [AppComponent]
 })

@@ -10,19 +10,19 @@ import { User } from '../../models/user';
 })
 export class NavbarComponent implements OnInit {
 
-  loggedUser: User;
+  user: User;
 
   constructor(private router: Router, private userService: UserService) { }
 
   ngOnInit() {
-    this.userService.subscribers.subscribe(user => {
-      this.loggedUser = user;
+    this.userService.currentUser.subscribe(user => {
+      this.user = user;
     });
   }
 
   logout() {
     sessionStorage.clear();
     this.router.navigate(['login']);
-    this.userService.subscribers.next(null);
+    this.userService.currentUser.next(null);
   }
 }

@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://revachatbackendelasticbeanstalk-env.nvwhqpvpsz.us-east-1.elasticbeanstalk.com/'
+  // apiUrl: 'http://revachatbackendelasticbeanstalk-env.nvwhqpvpsz.us-east-1.elasticbeanstalk.com/'
+  apiUrl: 'http://localhost:9999/revachat-backend/'
 };
 
 /*
