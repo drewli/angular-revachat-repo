@@ -11,22 +11,33 @@ import { User } from '../../models/user';
 export class LoginComponent implements OnInit {
 
   message = '';
-  loggedUser = sessionStorage.getItem('user');
+  loggedUser: string;
   isValid = true;
   em: string;
   pw: string;
   email: string;
   password: string;
   disabled = false;
+  users: User[] = [];
 
   constructor(private userService: UserService, private router: Router) { }
 
   ngOnInit() {
-    if (this.loggedUser != null) {
-      this.router.navigate(['landing']);
+    console.log('[LOG] - In LoginComponent.ngOnInit()');
+    this.loggedUser = sessionStorage.getItem('user');
+
+    if (this.loggedUser !== 'none' && this.loggedUser !== null) {
+      this.router.navigate(['chat']);
     }
 
-    this.userService.loadUsers();
+    this.loadUsers();
+  }
+
+  loadUsers() {
+    this.users = [];
+    this.userService.getAllUsers().subscribe(u => {
+      this.users = u;
+    });
   }
 
   // signInCognito() {
@@ -76,38 +87,44 @@ export class LoginComponent implements OnInit {
     // First get the user's idToken from cognito
     this.userService.signInCognito(this.email, this.password).subscribe(idToken => {
       if (idToken != null) {
-        const payload = idToken.decodePayload();
-        console.log(payload);
+        // Check if they already exist in our database
+        const sameEmail = this.users.filter(u => {
+          return u.email === this.email;
+        });
 
-        // If they have verified their email address
-        if (payload['email_verified'] === true) {
-          console.log('Email is verified');
-          console.log(this.userService.users);
-          // sameName = this.userService.users.filter(value => {
-          //   return value.email !== this.email;
-          // });
+        if (!sameEmail.length) {
+          const payload = idToken.decodePayload();
+          console.log(payload);
 
-          // Create the user to insert into our database
-          let user = new User();
-          user.firstName = payload['given_name'];
-          user.lastName = payload['family_name'];
-          user.username = payload['preferred_username'];
-          user.email = payload['email'];
+          // If they have verified their email address
+          if (payload['email_verified'] === true) {
+            console.log('Email is verified');
+            console.log(this.userService.users);
 
-          // this.userService.registerUser(user).subscribe(
-          //   function next(result) {
-          //     console.log(result);
-          //   },
-          //   function error(err) {
-          //     console.log(err);
-          //     if (err['error']['statusCode'] === 409) {
-                
-          //     }
-          //   }
-          // );
+            // Create the user to insert into our database
+            let user = new User();
+            user.firstName = payload['given_name'];
+            user.lastName = payload['family_name'];
+            user.username = payload['preferred_username'];
+            user.email = payload['email'];
+
+            this.userService.registerUser(user).subscribe(
+              function next(result) {
+                console.log(result);
+                sessionStorage.setItem('user', JSON.stringify(user));
+                this.router.navigate(['chat']);
+              },
+              function error(err) {
+                console.log(err);
+              }
+            );
+          } else {
+            this.message = 'Please verify your email address by clicking the link in the email we sent you.';
+            this.disabled = false;
+          }
         } else {
-          this.message = 'Please verify your email address by clicking the link in the email we sent you.';
-          this.disabled = false;
+          sessionStorage.setItem('user', JSON.stringify(sameEmail[0]));
+          this.router.navigate(['chat']);
         }
       }
     });
