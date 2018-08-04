@@ -12,9 +12,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
+
+import { 
+  MatDialog,
+  MatToolbarModule,
+} from '@angular/material';
 
 import { AppComponent } from './app.component';
-import { TestComponent } from './components/test/test.component';
 import { CognitoService } from './services/cognito.service';
 import { LoginComponent } from './components/login/login.component';
 import { HttpClientModule } from '@angular/common/http';
@@ -27,17 +32,18 @@ import { SocketService } from './services/socket.service';
 import { ChannelMenuComponent } from './components/channel-menu/channel-menu.component';
 import { UserService } from './services/user.service';
 import { ChannelService } from './services/channel.service';
+import { DialogChannelComponent } from './components/dialog-channel/dialog-channel.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    TestComponent,
     LoginComponent,
     RegisterComponent,
     LandingComponent,
     NavbarComponent,
     ChatComponent,
-    ChannelMenuComponent
+    ChannelMenuComponent,
+    DialogChannelComponent
   ],
   imports: [
     BrowserModule,
@@ -52,14 +58,18 @@ import { ChannelService } from './services/channel.service';
     MatIconModule,
     MatSidenavModule,
     MatButtonToggleModule,
-    MatButtonModule
+    MatButtonModule,
+    MatDialogModule,
+    MatToolbarModule
   ],
   providers: [
     CognitoService,
     SocketService,
     UserService,
-    ChannelService
+    ChannelService,
+    MatDialog
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [DialogChannelComponent]
 })
 export class AppModule { }
