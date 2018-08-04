@@ -25,7 +25,7 @@ const ROUTES: Routes = [
   },
   {
     path: 'chat',
-    component: ChatComponent
+    component: LandingComponent
   }
 ];
 

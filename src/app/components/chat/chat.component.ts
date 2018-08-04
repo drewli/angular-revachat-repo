@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { User } from '../../models/user';
 import { Action } from '../../models/action';
 import { Message } from '../../models/message';
@@ -6,6 +6,10 @@ import { SocketService } from '../../services/socket.service';
 import { Event } from '../../models/event';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
+import { Channel } from '../../models/channel';
+import { ChannelService } from '../../services/channel.service';
+import { MessageService } from '../../services/message.service';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-chat',
@@ -15,39 +19,63 @@ import { UserService } from '../../services/user.service';
 export class ChatComponent implements OnInit {
   action = Action;
   user: User;
-  users: User[] = [];
   messages: Message[] = [];
   channelMessages: Message[] = [];
   messageContent: string;
   ioConnection: any;
-  channel = 1;
+  channel: Channel;
+  messageObs$: BehaviorSubject<Message[]> = new BehaviorSubject<Message[]>([]);
 
-  constructor(private socketService: SocketService, private router: Router, private userService: UserService) { }
+  constructor(
+    private router: Router,
+    private socketService: SocketService,
+    private userService: UserService,
+    private channelService: ChannelService,
+    private messageService: MessageService
+  ) { }
 
   ngOnInit() {
-    this.user = JSON.parse(sessionStorage.getItem('user'));
+    console.log('[LOG] - In ChatComponent.ngOnInit()');
+    // this.userService.currentUser.subscribe(user => {
+    //   if (user == null) {
+    //     this.router.navigate(['login']);
+    //   } else {
+    //     this.user = user;
+    //     this.initIoConnection();
+    //   }
+    // });
 
-    if (this.user == null) {
+    if (!sessionStorage.length) {
+      this.userService.currentUser.next(null);
       this.router.navigate(['login']);
-    } else {
-      this.userService.subscribers.next(this.user);
-      this.initIoConnection();
     }
 
-    this.userService.getAllUsers().subscribe(u => {
-      this.users = u;
+    this.initIoConnection();
+
+    this.user = JSON.parse(sessionStorage.getItem('user'));
+    console.log(this.user);
+
+    this.channelService.channel.subscribe(channel => {
+      this.channel = channel;
     });
+
+    this.messageService.messages.subscribe(messages => {
+      this.messages = messages;
+    });
+    this.messageService.loadMessages();
   }
 
   private initIoConnection(): void {
+    console.log('[LOG] - In ChatComponent.initIoConnection()');
     this.socketService.initSocket();
 
     this.ioConnection = this.socketService.onMessage()
       .subscribe((message: Message) => {
         this.messages.push(message);
 
-        if (message.channel === this.channel) {
+        if (message.messageChannelId === this.channel.channelId) {
           this.channelMessages.push(message);
+          // document.getElementById('chat-list').scrollTop = document.getElementById('chat-list').scrollHeight;
         }
       });
 
@@ -63,42 +91,52 @@ export class ChatComponent implements OnInit {
       });
   }
 
-  // ============================= ADD DATABASE CONNECTION =============================
   public sendMessage(message: string): void {
+    console.log('[LOG] - In ChatComponent.sendMessage()');
     if (!message) {
       return;
     }
 
     if (message === 'exit') {
       this.socketService.disconnect();
-      this.userService.subscribers.next(null);
-      sessionStorage.setItem('user', 'none');
+      this.userService.currentUser.next(null);
+      sessionStorage.clear();
       this.router.navigate(['login']);
     }
 
-    this.socketService.send({
-      id: 0,
-      content: message,
-      sender: this.user.id,
-      channel: this.channel,
-      timestamp: new Date(),
+    const chatMessage: Message = {
+      messageId: 0,
+      messageContent: message,
+      messageSenderId: this.user.userId,
+      messageChannelId: this.channel.channelId,
+      messageTimestamp: new Date(),
       from: this.user
-    });
+    };
+
     this.messageContent = null;
+    this.socketService.send(chatMessage);
+
+    if (this.channel.channelId === -1){return;}
+
+    this.messageService.createMessage(chatMessage).subscribe(result => {
+      console.log(result);
+    });
+
   }
 
   public sendNotification(params: any, action: Action): void {
+    console.log('[LOG] - In ChatComponent.sendNotification()');
     let message: Message;
 
-    if (action === Action.JOINED) {
-      message = {
-        id: 0,
-        content: `${this.user.username} ${action}`,
-        sender: this.user.id,
-        channel: 1,
-        timestamp: new Date()
-      };
-    }
+    // if (action === Action.JOINED) {
+    //   message = {
+    //     id: 0,
+    //     content: `${this.user.username} ${action}`,
+    //     sender: this.user.id,
+    //     channel: 1,
+    //     timestamp: new Date()
+    //   };
+    // }
     // else if (action === Action.RENAME) {
     //   message = {
     //     action: action,

@@ -99,7 +99,7 @@ export class CognitoService {
       },
       onFailure: function(err: any) {
         console.log('[ERROR] - Failed to authenticate user');
-        console.log(err);
+        obs.next(new CognitoIdToken({IdToken: ''}));
       }
     });
 

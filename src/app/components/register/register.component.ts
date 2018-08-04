@@ -14,23 +14,28 @@ export class RegisterComponent implements OnInit {
   user = new User();
   users: User[] = [];
   isValid = false;
-  loggedUser = sessionStorage.getItem('user');
   password = '';
   registered = false;
 
   constructor(private userService: UserService, private router: Router) { }
 
   ngOnInit() {
-    if (this.loggedUser != null) {
-      this.router.navigate(['landing']);
-    }
+    this.userService.currentUser.subscribe(user => {
+      if (user != null) {
+        this.router.navigate(['landing']);
+      }
+    });
 
     this.user.username = '';
     this.user.firstName = '';
     this.user.lastName = '';
     this.user.email = '';
 
-    this.loadUsers();
+    this.userService.allUsers.subscribe(users => {
+      this.users = users;
+    });
+
+    this.userService.loadUsers();
   }
 
   register() {
@@ -51,13 +56,6 @@ export class RegisterComponent implements OnInit {
       this.userService.registerCognito(this.user, this.password);
       this.registered = true;
     }
-  }
-
-  loadUsers() {
-    this.users = [];
-    this.userService.getAllUsers().subscribe(u => {
-      this.users = u;
-    });
   }
 
   // register() {

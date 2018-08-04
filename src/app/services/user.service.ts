@@ -18,8 +18,8 @@ const HTTP_OPTIONS = {
 })
 export class UserService {
 
-  subscribers: BehaviorSubject<User> = new BehaviorSubject<User>(null);
-  users: User[] = [];
+  currentUser: BehaviorSubject<User> = new BehaviorSubject<User>(null);
+  allUsers: BehaviorSubject<User[]> = new BehaviorSubject<User[]>([]);
 
   constructor(private cognitoService: CognitoService, private http: HttpClient) {
     this.loadUsers();
@@ -27,9 +27,13 @@ export class UserService {
 
   loadUsers() {
     console.log('In UserService.loadUsers()');
-    // this.http.get<User[]>(environment.apiUrl + 'users', HTTP_OPTIONS).subscribe(users => {
-    //   this.users = users;
-    // });
+    this.http.get<User[]>(environment.apiUrl + 'users', HTTP_OPTIONS).subscribe(users => {
+      this.allUsers.next(users);
+    });
+  }
+
+  loadUser() {
+
   }
 
   registerCognito(user: User, password: string) {
@@ -60,10 +64,10 @@ export class UserService {
   //   return this.http.post<User>(environment.apiUrl + 'userForReimbursement.loadinfo', json, HTTP_OPTIONS);
   // }
 
-  getAllUsers() {
-    console.log('In UserService.getAllUsers()');
-    return this.http.get<User[]>(environment.apiUrl + 'users', HTTP_OPTIONS);
-  }
+  // getAllUsers() {
+  //   console.log('In UserService.getAllUsers()');
+  //   return this.http.get<User[]>(environment.apiUrl + 'users', HTTP_OPTIONS);
+  // }
 
   // isUsernameAvailable(usr: string) {
   //   const json = JSON.stringify(usr);

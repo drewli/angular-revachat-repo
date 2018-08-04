@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 import { User } from '../../models/user';
+import { CognitoIdToken } from 'amazon-cognito-identity-js';
 
 @Component({
   selector: 'app-login',
@@ -11,7 +12,6 @@ import { User } from '../../models/user';
 export class LoginComponent implements OnInit {
 
   message = '';
-  loggedUser: string;
   isValid = true;
   em: string;
   pw: string;
@@ -24,57 +24,22 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     console.log('[LOG] - In LoginComponent.ngOnInit()');
-    this.loggedUser = sessionStorage.getItem('user');
-
-    if (this.loggedUser !== 'none' && this.loggedUser !== null) {
-      this.router.navigate(['chat']);
+    if (sessionStorage.length) {
+      this.router.navigate(['landing']);
     }
 
-    this.loadUsers();
-  }
+    // this.userService.currentUser.subscribe(user => {
+    //   if (user != null) {
+    //     this.router.navigate(['chat']);
+    //   }
+    // });
 
-  loadUsers() {
-    this.users = [];
-    this.userService.getAllUsers().subscribe(u => {
-      this.users = u;
+    this.userService.allUsers.subscribe(users => {
+      this.users = users;
     });
+
+    this.userService.loadUsers();
   }
-
-  // signInCognito() {
-  //   this.message = '';
-  //   console.log('[LOG] - In LoginComponent.signInCognito()');
-  //   this.userService.signInCognito(this.email, this.password).subscribe(idToken => {
-  //     if (idToken !== null) {
-  //       const payload = idToken.decodePayload();
-  //       console.log(payload);
-  //       let user = new User();
-  //       user.firstName = payload['given_name'];
-  //       user.lastName = payload['family_name'];
-  //       user.username = payload['preferred_username'];
-  //       user.email = payload['email'];
-
-  //       this.userService.registerUser(user).subscribe(result => {
-  //         console.log(result);
-  //       });
-  //     }
-  //   });
-  // }
-
-  // login() {
-  //   console.log('[LOG] - In LoginComponent.login()');
-  //   this.isValid = true;
-  //   this.userService.loginUser([this.email, this.pw]).subscribe(user => {
-  //     if (user == null || user.userId === -1) {
-  //       console.log('[ERROR] - Invalid credentials');
-  //       this.isValid = false;
-  //     } else {
-  //       this.userService.subscribers.next(user);
-  //       sessionStorage.setItem('user', JSON.stringify(user));
-  //       console.log(`[LOG] - User, ${user.username}, successfully logged in!`);
-  //       this.router.navigate(['landing']);
-  //     }
-  //   });
-  // }
 
   login() {
     console.log('[LOG] - In LoginComponent.login()');
@@ -86,20 +51,30 @@ export class LoginComponent implements OnInit {
 
     // First get the user's idToken from cognito
     this.userService.signInCognito(this.email, this.password).subscribe(idToken => {
+      console.log('[LOG] - User authentication and login');
       if (idToken != null) {
+        console.log('      - idToken is not null');
+        const payload = idToken.decodePayload();
+
+        if (!payload['given_name']) {
+          console.log('      - Payload is empty; User does not exist');
+          this.message = 'Invalid Credentials';
+          this.disabled = false;
+          return;
+        }
+
+        console.log('      - Payload is not empty; User exists');
         // Check if they already exist in our database
         const sameEmail = this.users.filter(u => {
           return u.email === this.email;
         });
 
         if (!sameEmail.length) {
-          const payload = idToken.decodePayload();
-          console.log(payload);
-
+          console.log('      - User is not in database');
           // If they have verified their email address
           if (payload['email_verified'] === true) {
-            console.log('Email is verified');
-            console.log(this.userService.users);
+            console.log('      - User has verified their email address');
+            console.log('      - Inserting user record into the database');
 
             // Create the user to insert into our database
             let user = new User();
@@ -108,21 +83,21 @@ export class LoginComponent implements OnInit {
             user.username = payload['preferred_username'];
             user.email = payload['email'];
 
-            this.userService.registerUser(user).subscribe(
-              function next(result) {
-                console.log(result);
-                sessionStorage.setItem('user', JSON.stringify(user));
-                this.router.navigate(['chat']);
-              },
-              function error(err) {
-                console.log(err);
-              }
-            );
+            this.userService.registerUser(user).subscribe(result => {
+              console.log('      - Result');
+              console.log(result);
+              this.userService.currentUser.next(result);
+              sessionStorage.setItem('user', JSON.stringify(result));
+              this.router.navigate(['chat']);
+            });
           } else {
+            console.log('      - User has not verified their email address');
             this.message = 'Please verify your email address by clicking the link in the email we sent you.';
             this.disabled = false;
           }
         } else {
+          console.log('      - User is already in database');
+          this.userService.currentUser.next(sameEmail[0]);
           sessionStorage.setItem('user', JSON.stringify(sameEmail[0]));
           this.router.navigate(['chat']);
         }
