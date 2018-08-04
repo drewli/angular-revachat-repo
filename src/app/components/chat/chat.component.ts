@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { User } from '../../models/user';
 import { Action } from '../../models/action';
 import { Message } from '../../models/message';
@@ -9,6 +9,7 @@ import { UserService } from '../../services/user.service';
 import { Channel } from '../../models/channel';
 import { ChannelService } from '../../services/channel.service';
 import { MessageService } from '../../services/message.service';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-chat',
@@ -23,6 +24,7 @@ export class ChatComponent implements OnInit {
   messageContent: string;
   ioConnection: any;
   channel: Channel;
+  messageObs$: BehaviorSubject<Message[]> = new BehaviorSubject<Message[]>([]);
 
   constructor(
     private router: Router,
@@ -34,14 +36,24 @@ export class ChatComponent implements OnInit {
 
   ngOnInit() {
     console.log('[LOG] - In ChatComponent.ngOnInit()');
-    this.userService.currentUser.subscribe(user => {
-      if (user == null) {
-        this.router.navigate(['login']);
-      } else {
-        this.user = user;
-        this.initIoConnection();
-      }
-    });
+    // this.userService.currentUser.subscribe(user => {
+    //   if (user == null) {
+    //     this.router.navigate(['login']);
+    //   } else {
+    //     this.user = user;
+    //     this.initIoConnection();
+    //   }
+    // });
+
+    if (!sessionStorage.length) {
+      this.userService.currentUser.next(null);
+      this.router.navigate(['login']);
+    }
+
+    this.initIoConnection();
+
+    this.user = JSON.parse(sessionStorage.getItem('user'));
+    console.log(this.user);
 
     this.channelService.channel.subscribe(channel => {
       this.channel = channel;
@@ -61,8 +73,9 @@ export class ChatComponent implements OnInit {
       .subscribe((message: Message) => {
         this.messages.push(message);
 
-        if (message.messageChannelId === this.channel.id) {
+        if (message.messageChannelId === this.channel.channelId) {
           this.channelMessages.push(message);
+          // document.getElementById('chat-list').scrollTop = document.getElementById('chat-list').scrollHeight;
         }
       });
 
@@ -87,7 +100,7 @@ export class ChatComponent implements OnInit {
     if (message === 'exit') {
       this.socketService.disconnect();
       this.userService.currentUser.next(null);
-      sessionStorage.setItem('user', 'none');
+      sessionStorage.clear();
       this.router.navigate(['login']);
     }
 
@@ -95,16 +108,20 @@ export class ChatComponent implements OnInit {
       messageId: 0,
       messageContent: message,
       messageSenderId: this.user.userId,
-      messageChannelId: this.channel.id,
+      messageChannelId: this.channel.channelId,
       messageTimestamp: new Date(),
       from: this.user
     };
 
+    this.messageContent = null;
+    this.socketService.send(chatMessage);
+
+    if (this.channel.channelId === -1){return;}
+
     this.messageService.createMessage(chatMessage).subscribe(result => {
       console.log(result);
     });
-    this.socketService.send(chatMessage);
-    this.messageContent = null;
+
   }
 
   public sendNotification(params: any, action: Action): void {

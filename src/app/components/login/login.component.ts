@@ -24,11 +24,15 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     console.log('[LOG] - In LoginComponent.ngOnInit()');
-    this.userService.currentUser.subscribe(user => {
-      if (user != null) {
-        this.router.navigate(['chat']);
-      }
-    });
+    if (sessionStorage.length) {
+      this.router.navigate(['landing']);
+    }
+
+    // this.userService.currentUser.subscribe(user => {
+    //   if (user != null) {
+    //     this.router.navigate(['chat']);
+    //   }
+    // });
 
     this.userService.allUsers.subscribe(users => {
       this.users = users;
@@ -83,6 +87,7 @@ export class LoginComponent implements OnInit {
               console.log('      - Result');
               console.log(result);
               this.userService.currentUser.next(result);
+              sessionStorage.setItem('user', JSON.stringify(result));
               this.router.navigate(['chat']);
             });
           } else {
@@ -93,7 +98,7 @@ export class LoginComponent implements OnInit {
         } else {
           console.log('      - User is already in database');
           this.userService.currentUser.next(sameEmail[0]);
-          console.log(sameEmail[0]);
+          sessionStorage.setItem('user', JSON.stringify(sameEmail[0]));
           this.router.navigate(['chat']);
         }
       }

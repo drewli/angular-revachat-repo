@@ -15,13 +15,13 @@ const HTTP_OPTIONS = {
 })
 export class ChannelService {
 
-  channel: BehaviorSubject<Channel> = new BehaviorSubject<Channel>({id: 1, isDirectMessaging: 'false', name: 'General'});
+  channel: BehaviorSubject<Channel> = new BehaviorSubject<Channel>({channelId: -1, isDirectMessaging: 'false', channelName: 'General'});
   allChannels: BehaviorSubject<Channel[]> = new BehaviorSubject<Channel[]>([]);
 
   constructor(private http: HttpClient) { }
 
   createChannel(channel: Channel): Observable<Channel> {
-    console.log(`[LOG] - Creating channel ${channel.name}`);
+    console.log(`[LOG] - Creating channel ${channel.channelName}`);
     const json = JSON.stringify(channel);
     return this.http.post<Channel>(environment.apiUrl + 'channels', json, HTTP_OPTIONS);
   }

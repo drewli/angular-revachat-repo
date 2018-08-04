@@ -16,7 +16,8 @@ export class ChannelMenuComponent implements OnInit {
 
   constructor(
     private channelService: ChannelService,
-    private userService: UserService) { }
+    private userService: UserService
+  ) { }
 
   ngOnInit() {
     this.channelService.allChannels.subscribe(channels => {
@@ -26,6 +27,10 @@ export class ChannelMenuComponent implements OnInit {
     this.userService.currentUser.subscribe(user => {
       this.user = user;
     });
+  }
+
+  changeChannel(channelId: number) {
+    console.log(channelId);
   }
 
 }

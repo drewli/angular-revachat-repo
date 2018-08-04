@@ -9,6 +9,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatButtonModule } from '@angular/material/button';
 
 import { AppComponent } from './app.component';
 import { TestComponent } from './components/test/test.component';
@@ -46,7 +49,10 @@ import { ChannelService } from './services/channel.service';
     MatInputModule,
     MatListModule,
     MatCardModule,
-    MatIconModule
+    MatIconModule,
+    MatSidenavModule,
+    MatButtonToggleModule,
+    MatButtonModule
   ],
   providers: [
     CognitoService,

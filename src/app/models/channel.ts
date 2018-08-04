@@ -1,5 +1,5 @@
 export class Channel {
-    id?: number;
+    channelId?: number;
     isDirectMessaging: string;
-    name: string;
+    channelName: string;
 }
