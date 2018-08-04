@@ -3,23 +3,37 @@
 </button> -->
 <div class="chat-container">
   <mat-card class="main-card">
-    <mat-list class="chat-list">
-      <mat-list-item *ngFor="let message of channelMessages" [ngClass]="[(message.action === undefined && message.sender === user.id)? 'chat-list-item': '']">
+    <ol id="chat-list" class="chat-list" #scrollMe [scrollTop]="scrollMe.scrollHeight">
+      <mat-list-item *ngFor="let message of channelMessages" [ngClass]="[(message.action === undefined && message.messageSenderId === user.id)? 'chat-list-item': '']">
+          <!-- <mat-list-item *ngFor="let message of messageObs$ | async" [ngClass]="[(message.action === undefined && message.messageSenderId === user.id)? 'chat-list-item': '']"> -->
         <!-- <img mat-list-avatar *ngIf="message.action === undefined" [src]="message.from.avatar"> -->
-        <h4 mat-line *ngIf="message.action === undefined">
+        <mat-card class="chat-list-item">
+          <!-- <div mat-card-avatar class="example-header-image"></div> -->
+          <mat-card-subtitle>{{message.from.username}}</mat-card-subtitle>
+          {{message.messageContent}}
+          <!-- <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" alt="Photo of a Shiba Inu"> -->
+          <!-- <mat-card-content>
+          </mat-card-content> -->
+          <!-- <mat-card-actions> -->
+            <!-- <button mat-button>LIKE</button>
+            <button mat-button>SHARE</button> -->
+          <!-- </mat-card-actions> -->
+        </mat-card>
+
+        <!-- <h4 mat-line *ngIf="message.action === undefined">
           <b>{{message.from.username}}</b>
         </h4>
         <p mat-line *ngIf="message.action === undefined">
-          <span> {{message.content}} </span>
+          <span> {{message.messageContent}} </span>
         </p>
         <p mat-line *ngIf="message.action === action.JOINED" class="chat-notification">
           <span> <b>{{message.from.username}}</b> joined to the conversation. </span>
         </p>
         <p mat-line *ngIf="message.action === action.RENAME" class="chat-notification">
           <span> <b>{{message.content.previousUsername}}</b> is now <b>{{message.content.username}}</b> </span>
-        </p>
+        </p> -->
       </mat-list-item>
-    </mat-list>
+    </ol>
     <div class="chat-footer-container">
       <!-- <mat-icon>message</mat-icon> -->
       <mat-form-field class="chat-input">
@@ -34,3 +48,5 @@
     </div>
   </mat-card>
 </div>
+
+

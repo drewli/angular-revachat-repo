@@ -6,15 +6,15 @@
 
       <div class="form-group">
         <label for="email">Email Address</label> <input type="email" [(ngModel)]="this.em"
-          class="form-control" id="email" placeholder="Email Address">
+          class="form-control" id="email" placeholder="Email Address" (keyup.enter)="login()">
       </div>
 
       <div class="form-group">
         <label for="password">Password</label> <input type="password" [(ngModel)]="this.pw"
-          class="form-control" id="password" placeholder="Password">
+          class="form-control" id="password" placeholder="Password" (keyup.enter)="login()">
       </div>
 
-      <button type="submit" class="btn btn-primary" (click)="login()" diabled="this.diabled">Login</button>
+      <button type="submit" class="btn btn-primary" (click)="login()" [disabled]="this.disabled">Login</button>
       <br> <br>
 
       <div *ngIf="message" class="alert alert-danger">{{message}}</div>
