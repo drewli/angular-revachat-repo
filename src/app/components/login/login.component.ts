@@ -4,8 +4,6 @@ import { Router } from '@angular/router';
 import { User } from '../../models/user';
 // import { CognitoIdToken } from 'amazon-cognito-identity-js';
 
-const AVATAR_URL = 'https://api.adorable.io/avatars/';
-
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -22,7 +20,10 @@ export class LoginComponent implements OnInit {
   disabled = false;
   users: User[] = [];
 
-  constructor(private userService: UserService, private router: Router) { }
+  constructor(
+    private userService: UserService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     console.log('[LOG] - In LoginComponent.ngOnInit()');
@@ -37,8 +38,8 @@ export class LoginComponent implements OnInit {
     this.userService.loadUsers();
   }
 
-  private getRandomId(): number {
-    return Math.floor(Math.random() * (1000000)) + 1;
+  private getRandomAvatar(): string {
+    return `https://api.adorable.io/avatars/${Math.floor(Math.random() * (1000000)) + 1}`;
   }
 
   login() {
@@ -82,7 +83,7 @@ export class LoginComponent implements OnInit {
             user.lastName = payload['family_name'];
             user.username = payload['preferred_username'];
             user.email = payload['email'];
-            user.userAvatar = `${AVATAR_URL}/${this.getRandomId()}.png`;
+            user.userAvatar = this.getRandomAvatar();
 
             this.userService.registerUser(user).subscribe(result => {
               console.log('      - Result');

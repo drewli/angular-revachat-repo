@@ -6,15 +6,11 @@ import { UserService } from '../../services/user.service';
 import { MatDialogRef, MatDialog } from '@angular/material';
 import { DialogChannelComponent } from '../dialog-channel/dialog-channel.component';
 import { DialogChannelType } from '../dialog-channel/dialog-channel-type';
-import { MAT_DIALOG_DATA } from '@angular/material';
 import { ChannelMembershipService } from '../../services/channel-membership.service';
 import { ChannelMembership } from '../../models/channel-membership';
 import { DialogErrorComponent } from '../dialog-error/dialog-error.component';
-import { catchError } from 'rxjs/operators';
 import { SocketService } from '../../services/socket.service';
 import { Router } from '@angular/router';
-import { TargetLocator } from 'selenium-webdriver';
-import { ProxyClass } from '@angular/compiler';
 
 @Component({
   selector: 'app-channel-menu',
@@ -24,9 +20,10 @@ import { ProxyClass } from '@angular/compiler';
 export class ChannelMenuComponent implements OnInit {
 
   user: User;
+  channel: Channel;
   channels: Channel[];
   channelMemberships: ChannelMembership[];
-  userChannels: Channel[] = [];
+  userChannels: Channel[] = [this.channelService.generalChat];
   dialogRef: MatDialogRef<DialogChannelComponent> | null;
   dialogErrorRef: MatDialogRef<DialogErrorComponent> | null;
 
@@ -40,7 +37,6 @@ export class ChannelMenuComponent implements OnInit {
 
   constructor(
     private channelService: ChannelService,
-    private userService: UserService,
     private membershipService: ChannelMembershipService,
     private socketService: SocketService,
     private router: Router,
@@ -52,7 +48,7 @@ export class ChannelMenuComponent implements OnInit {
 
     this.membershipService.channelMemberships.subscribe(memberships => {
       this.channelMemberships = memberships;
-      this.userChannels = [];
+      // this.userChannels = [];
 
       this.channelMemberships.forEach(
         membership => {
@@ -82,7 +78,7 @@ export class ChannelMenuComponent implements OnInit {
             }
           );
 
-          if (!membershipArray.length) {
+          if (!membershipArray.length && channel.channelId !== -1) {
             this.userChannels.splice(index);
           }
         }
@@ -94,6 +90,12 @@ export class ChannelMenuComponent implements OnInit {
       this.channels = channels;
     });
     this.channelService.loadChannels();
+
+    this.channelService.channel.subscribe(
+      channel => {
+        this.channel = channel;
+      }
+    );
   }
 
   openChannelPopup(params: any) {
@@ -179,6 +181,13 @@ export class ChannelMenuComponent implements OnInit {
     console.log(newChannel);
 
     this.channelService.channel.next(newChannel);
+  }
+
+  getColor(channelId: number): string {
+    if (this.channel.channelId === channelId) {
+      return 'primary';
+    }
+    return 'accent';
   }
 
   logout() {
