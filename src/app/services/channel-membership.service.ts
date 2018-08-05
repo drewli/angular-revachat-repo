@@ -22,6 +22,7 @@ export class ChannelMembershipService {
   createChannelMembership(membership: ChannelMembership): Observable<ChannelMembership> {
     console.log('[LOG] - In ChannelMembershipService.createChannelMembership()');
     const json = JSON.stringify(membership);
+    console.log(json);
     return this.http.post<ChannelMembership>(environment.apiUrl + 'channel-memberships', json, HTTP_OPTIONS);
   }
 

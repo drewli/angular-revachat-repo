@@ -65,8 +65,13 @@
 .mat-list .mat-list-item .mat-line{
     word-wrap: break-word;
     white-space: pre-wrap;
+    font-size: 17px;
 }
 
-.chat-message-body {
+.username .content {
+    font-size: 17px;
+}
+
+.time {
     font-size: 1em;
 }
