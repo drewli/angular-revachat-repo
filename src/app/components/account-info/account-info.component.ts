@@ -35,10 +35,10 @@ export class AccountInfoComponent implements OnInit {
   updateAccountInfo() {
     this.message = '';
 
-    if (!this.validatePassword()) {
+    /* if (!this.validatePassword()) {
       this.message = 'Incorrect Password';
       return;
-    }
+    } */
 
     const sameName = this.users.filter(u => {
       return u.username === this.user.username && u.userId !== this.user.userId;
