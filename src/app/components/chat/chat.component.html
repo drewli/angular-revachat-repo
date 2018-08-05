@@ -7,10 +7,10 @@
       <mat-list *ngFor="let message of channelMessages" dense>
           <mat-list-item class="chat-message-body" fxLayoutAlign="" dir="ltl">
               <div matLine>
-                  <b>{{message.from.username}} </b>
-                  <span>{{message.messageTimestamp | date:'shortTime'}} </span>
+                  <b class="username">{{message.from.username}} </b>
+                  <span class="time">{{message.messageTimestamp | date:'shortTime'}} </span>
               </div>
-              <span matLine> {{message.messageContent}} </span>
+              <span matLine class="content"> {{message.messageContent}} </span>
               <img matListAvatar class="img-box" src="http://via.placeholder.com/30x30" alt="...">
           </mat-list-item>
       </mat-list>

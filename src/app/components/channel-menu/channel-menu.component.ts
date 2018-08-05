@@ -56,7 +56,6 @@ export class ChannelMenuComponent implements OnInit {
 
       this.channelMemberships.forEach(
         membership => {
-          console.log(membership);
           if (membership.channelUserId === this.user.userId) {
             const sameChannel = this.userChannels.filter(
               channel => {
@@ -71,6 +70,20 @@ export class ChannelMenuComponent implements OnInit {
                 }
               );
             }
+          }
+        }
+      );
+
+      this.userChannels.forEach(
+        (channel, index) => {
+          const membershipArray = this.channelMemberships.filter(
+            membership => {
+              return membership.channelUserId === this.user.userId && membership.channelId === channel.channelId;
+            }
+          );
+
+          if (!membershipArray.length) {
+            this.userChannels.splice(index);
           }
         }
       );
@@ -129,7 +142,7 @@ export class ChannelMenuComponent implements OnInit {
 
           this.membershipService.createChannelMembership(membership).subscribe(
             result => {
-              console.log(result);
+              this.membershipService.loadChannelMemberships();
             },
             error => {
               console.log(error);
