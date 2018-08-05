@@ -35,6 +35,7 @@ import { ChannelService } from './services/channel.service';
 import { DialogChannelComponent } from './components/dialog-channel/dialog-channel.component';
 import { ChannelMembershipService } from './services/channel-membership.service';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
+import { AccountInfoComponent } from './components/account-info/account-info.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +47,8 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
     ChatComponent,
     ChannelMenuComponent,
     DialogChannelComponent,
-    DialogErrorComponent
+    DialogErrorComponent,
+    AccountInfoComponent
   ],
   imports: [
     BrowserModule,
