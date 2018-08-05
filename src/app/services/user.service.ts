@@ -32,10 +32,6 @@ export class UserService {
     });
   }
 
-  loadUser() {
-
-  }
-
   registerCognito(user: User, password: string) {
     console.log('In UserService.registerCognito()');
     this.cognitoService.registerUser(user.email, user.username, password, user.firstName, user.lastName);

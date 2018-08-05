@@ -33,6 +33,8 @@ import { ChannelMenuComponent } from './components/channel-menu/channel-menu.com
 import { UserService } from './services/user.service';
 import { ChannelService } from './services/channel.service';
 import { DialogChannelComponent } from './components/dialog-channel/dialog-channel.component';
+import { ChannelMembershipService } from './services/channel-membership.service';
+import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +45,8 @@ import { DialogChannelComponent } from './components/dialog-channel/dialog-chann
     NavbarComponent,
     ChatComponent,
     ChannelMenuComponent,
-    DialogChannelComponent
+    DialogChannelComponent,
+    DialogErrorComponent
   ],
   imports: [
     BrowserModule,
@@ -67,9 +70,13 @@ import { DialogChannelComponent } from './components/dialog-channel/dialog-chann
     SocketService,
     UserService,
     ChannelService,
-    MatDialog
+    MatDialog,
+    ChannelMembershipService
   ],
   bootstrap: [AppComponent],
-  entryComponents: [DialogChannelComponent]
+  entryComponents: [
+    DialogChannelComponent,
+    DialogErrorComponent
+  ]
 })
 export class AppModule { }
