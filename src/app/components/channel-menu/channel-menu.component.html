@@ -3,11 +3,8 @@
         <h6 matSubHeader>Channels</h6>
     </mat-list-item>
     <mat-list-item><button mat-button (click)="changeChannel(-1)" >General</button></mat-list-item>
-    <mat-list-item><button mat-button>Channel 2</button></mat-list-item>
-    <mat-list-item><button mat-button>Channel 3</button></mat-list-item>
-    <mat-list-item><button mat-button>Channel 4</button></mat-list-item>
-    <mat-list-item><button mat-button>Channel 5</button></mat-list-item>
-    <mat-list-item><button mat-button>Channel 6</button></mat-list-item>
-    <mat-list-item><button mat-button>Channel 7</button></mat-list-item>
+    <mat-list-item *ngFor="let channel of userChannels">
+        <button mat-button (click)="changeChannel(channel.channelId)" >{{channel.channelName}}</button>
+    </mat-list-item>
     <mat-list-item><button mat-button (click)="openChannelPopup(publicParams)" >Create Channel</button></mat-list-item>
 </mat-list>

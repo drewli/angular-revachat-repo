@@ -17,9 +17,7 @@ export class DialogChannelComponent implements OnInit {
   }
 
   // Close the dialog box and return the name of the new channel
-  public onSave(): void {
-    this.dialogRef.close({
-      channelName: this.params.channelName
-    });
+  public onSave(name: string): void {
+    this.dialogRef.close({channelType: this.params.channelType, channelName: name});
   }
 }

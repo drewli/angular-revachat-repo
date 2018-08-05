@@ -7,6 +7,14 @@ import { MatDialogRef, MatDialog } from '@angular/material';
 import { DialogChannelComponent } from '../dialog-channel/dialog-channel.component';
 import { DialogChannelType } from '../dialog-channel/dialog-channel-type';
 import { MAT_DIALOG_DATA } from '@angular/material';
+import { ChannelMembershipService } from '../../services/channel-membership.service';
+import { ChannelMembership } from '../../models/channel-membership';
+import { DialogErrorComponent } from '../dialog-error/dialog-error.component';
+import { catchError } from 'rxjs/operators';
+import { SocketService } from '../../services/socket.service';
+import { Router } from '@angular/router';
+import { TargetLocator } from 'selenium-webdriver';
+import { ProxyClass } from '@angular/compiler';
 
 @Component({
   selector: 'app-channel-menu',
@@ -17,7 +25,10 @@ export class ChannelMenuComponent implements OnInit {
 
   user: User;
   channels: Channel[];
+  channelMemberships: ChannelMembership[];
+  userChannels: Channel[] = [];
   dialogRef: MatDialogRef<DialogChannelComponent> | null;
+  dialogErrorRef: MatDialogRef<DialogErrorComponent> | null;
 
   publicParams = {
     data: {
@@ -27,62 +38,149 @@ export class ChannelMenuComponent implements OnInit {
     }
   };
 
-  // privateParams = {
-  //   data: {
-  //     title: 'New Direct Message',
-  //     channelType: DialogChannelType.PRIVATE,
-  //     creator: this.user
-  //   }
-  // };
-  // defaultDialogParams: any = {
-  //   disableClose: true,
-  //   data: {
-  //     title: 'New Channel',
-  //     channelType: DialogChannelType.PUBLIC
-  //   }
-  // };
-
   constructor(
     private channelService: ChannelService,
     private userService: UserService,
+    private membershipService: ChannelMembershipService,
+    private socketService: SocketService,
+    private router: Router,
     public dialog: MatDialog
   ) { }
 
   ngOnInit() {
+    this.user = JSON.parse(sessionStorage.getItem('user'));
+
+    this.membershipService.channelMemberships.subscribe(memberships => {
+      this.channelMemberships = memberships;
+      this.userChannels = [];
+
+      this.channelMemberships.forEach(
+        membership => {
+          console.log(membership);
+          if (membership.channelUserId === this.user.userId) {
+            const sameChannel = this.userChannels.filter(
+              channel => {
+                return channel.channelId === membership.channelId;
+              }
+            );
+
+            if (!sameChannel.length) {
+              this.channelService.getChannelById(membership.channelId).subscribe(
+                channel => {
+                  this.userChannels.push(channel);
+                }
+              );
+            }
+          }
+        }
+      );
+    });
+    this.membershipService.loadChannelMemberships();
+
     this.channelService.allChannels.subscribe(channels => {
       this.channels = channels;
     });
-
-    this.userService.currentUser.subscribe(user => {
-      this.user = user;
-    });
+    this.channelService.loadChannels();
   }
 
   openChannelPopup(params: any) {
-    // this.dialogRef = this.dialog.open(DialogChannelComponent, params);
-    // this.dialogRef.afterClosed().subscribe(paramsDialog => {
-    //   if (!paramsDialog) {
-    //     return;
-    //   }
+    this.dialogRef = this.dialog.open(DialogChannelComponent, params);
+    this.dialogRef.afterClosed().subscribe(paramsDialog => {
+      if (!paramsDialog) {
+        return;
+      }
 
-    //   const channel: Channel = {
-    //     isDirectMessaging: (paramsDialog.channelType === DialogChannelType.PUBLIC) ? 'false' : 'true',
-    //     channelName: paramsDialog.channelName
-    //   };
+      const channel: Channel = {
+        isDirectMessaging: (paramsDialog.channelType === DialogChannelType.PUBLIC) ? 'false' : 'true',
+        channelName: paramsDialog.channelName
+      };
 
-    //   console.log(channel);
-    //   // this.user.name = paramsDialog.username;
-    //   // if (paramsDialog.dialogType === DialogUserType.NEW) {
-    //   //   this.initIoConnection();
-    //   //   this.sendNotification(paramsDialog, Action.JOINED);
-    //   // } else if (paramsDialog.dialogType === DialogUserType.EDIT) {
-    //   //   this.sendNotification(paramsDialog, Action.RENAME);
-    //   // }
-    // });
+      if (!channel.channelName) {
+        console.log('[LOG] - Empty channel name');
+        return;
+      }
+
+      console.log(channel);
+      this.createChannel(channel);
+
+      // this.user.name = paramsDialog.username;
+      // if (paramsDialog.dialogType === DialogUserType.NEW) {
+      //   this.initIoConnection();
+      //   this.sendNotification(paramsDialog, Action.JOINED);
+      // } else if (paramsDialog.dialogType === DialogUserType.EDIT) {
+      //   this.sendNotification(paramsDialog, Action.RENAME);
+      // }
+    });
+  }
+
+  createChannel(channel: Channel) {
+    this.channelService.createChannel(channel).subscribe(
+      result => {
+        if (result) {
+          channel = result;
+          console.log(`Result: ${result}`);
+          this.channelService.loadChannels();
+
+          const membership: ChannelMembership = {
+            channelUserId: this.user.userId,
+            channelId: channel.channelId,
+            channelUserRole: 'admin'
+          };
+
+          this.membershipService.createChannelMembership(membership).subscribe(
+            result => {
+              console.log(result);
+            },
+            error => {
+              console.log(error);
+            }
+          );
+        }
+      },
+      error => {
+        this.openErrorPopup('A channel with that name already exists');
+      }
+    );
+  }
+
+  openErrorPopup(message: string) {
+    const params = {
+      data: {
+        message: message
+      }
+    };
+    this.dialogErrorRef = this.dialog.open(DialogErrorComponent, params);
   }
 
   changeChannel(channelId: number) {
     console.log(channelId);
+    if (channelId === -1) {
+      this.channelService.channel.next(this.channelService.generalChat);
+      return;
+    }
+
+    const newChannel = this.channels.filter(value => {
+      return value.channelId === channelId;
+    })[0];
+
+    console.log(newChannel);
+
+    this.channelService.channel.next(newChannel);
   }
 
+  logout() {
+    sessionStorage.clear();
+    this.socketService.disconnect();
+    this.router.navigate(['login']);
+  }
 }
+
+
+// [
+//   {
+//       "channelMembershipId": 2,
+//       "channelUserId": 1,
+//       "channelUserRole": "admin",
+//       "channelId": 1
+//   }
+// ]

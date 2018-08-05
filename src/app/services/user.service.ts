@@ -18,7 +18,6 @@ const HTTP_OPTIONS = {
 })
 export class UserService {
 
-  currentUser: BehaviorSubject<User> = new BehaviorSubject<User>(null);
   allUsers: BehaviorSubject<User[]> = new BehaviorSubject<User[]>([]);
 
   constructor(private cognitoService: CognitoService, private http: HttpClient) {
@@ -30,10 +29,6 @@ export class UserService {
     this.http.get<User[]>(environment.apiUrl + 'users', HTTP_OPTIONS).subscribe(users => {
       this.allUsers.next(users);
     });
-  }
-
-  loadUser() {
-
   }
 
   registerCognito(user: User, password: string) {

@@ -20,11 +20,9 @@ export class RegisterComponent implements OnInit {
   constructor(private userService: UserService, private router: Router) { }
 
   ngOnInit() {
-    this.userService.currentUser.subscribe(user => {
-      if (user != null) {
-        this.router.navigate(['landing']);
-      }
-    });
+    if (sessionStorage.length) {
+      this.router.navigate(['landing']);
+    }
 
     this.user.username = '';
     this.user.firstName = '';

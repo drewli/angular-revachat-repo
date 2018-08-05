@@ -29,8 +29,7 @@
 }
 
 .chat-list-item {
-    left: 50%;
-    width: 50%;
+    width: 30%;
     margin-top: 2px;
     margin-bottom: 2px;
 }
@@ -44,12 +43,11 @@
     bottom:25px;
     left:25px;
     right:25px;
-    /* right:-390px; */
 }
 
-.chat-notification {
+/* .chat-notification {
     text-align: center;
-}
+} */
 
 /* .chat {
     list-style: none;
@@ -63,3 +61,12 @@
     overflow-y: scroll;
     padding-right: 17px;
 } */
+
+.mat-list .mat-list-item .mat-line{
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.chat-message-body {
+    font-size: 1em;
+}

@@ -1,18 +1,14 @@
 <h2 mat-dialog-title>{{params.title}}</h2>
 
-<!-- <mat-dialog-content>
+<mat-dialog-content>
   <mat-form-field>
-    <input matInput 
-    name="channelName" 
+    <input matInput
+    #textField
     placeholder="Channel Name"
-    [(ngModel)]="params.channelName"
-    (keyup.enter)="onSave()"
-    [formControl]="channelNameFormControl"
-    required>
-    <mat-error>This field is required</mat-error>
-    <mat-hint>Please type the name of your new channel</mat-hint>
+    (keyup.enter)="onSave(textField.value)">
+    <mat-hint>Enter the name of your channel</mat-hint>
   </mat-form-field>
-</mat-dialog-content> -->
+</mat-dialog-content>
 
 <!-- <mat-dialog-actions *ngIf="params?.typeDialog === 'new-user'" [attr.align]="'end'">
   <button mat-raised-button color="primary" mat-dialog-close (click)="onSave()" [disabled]="channelNameFormControl.hasError('required')">Chat!</button>
