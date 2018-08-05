@@ -36,7 +36,6 @@ export class ChatComponent implements OnInit {
 
   ngOnInit() {
     if (!sessionStorage.length) {
-      this.userService.currentUser.next(null);
       this.router.navigate(['login']);
     }
 
@@ -135,7 +134,6 @@ export class ChatComponent implements OnInit {
 
     if (message === 'exit') {
       this.socketService.disconnect();
-      this.userService.currentUser.next(null);
       sessionStorage.clear();
       this.router.navigate(['login']);
     }

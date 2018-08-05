@@ -18,7 +18,6 @@ const HTTP_OPTIONS = {
 })
 export class UserService {
 
-  currentUser: BehaviorSubject<User> = new BehaviorSubject<User>(null);
   allUsers: BehaviorSubject<User[]> = new BehaviorSubject<User[]>([]);
 
   constructor(private cognitoService: CognitoService, private http: HttpClient) {
