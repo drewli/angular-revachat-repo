@@ -37,7 +37,6 @@ export class ChannelMenuComponent implements OnInit {
 
   constructor(
     private channelService: ChannelService,
-    private userService: UserService,
     private membershipService: ChannelMembershipService,
     private socketService: SocketService,
     private router: Router,

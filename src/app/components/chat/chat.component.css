@@ -68,10 +68,7 @@
     font-size: 17px;
 }
 
-.username .content {
-    font-size: 17px;
-}
-
-.time {
-    font-size: 1em;
+.img-box {
+    width: 100px;
+    height: 100px;
 }

@@ -70,7 +70,6 @@ export class CognitoService {
       }
 
       cognitoUser = result.user;
-      sessionStorage.setItem('cognitoUser', cognitoUser);
       console.log('[LOG] - Created cognito user');
     });
   }

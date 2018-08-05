@@ -42,9 +42,16 @@ export class UserService {
   }
 
   registerUser(user: User): Observable<User> {
-    console.log(`Attempting to register user: ${user.username}`);
+    console.log('In UserService.registerUser()');
     const json = JSON.stringify(user);
     return this.http.post<User>(environment.apiUrl + 'users', json, HTTP_OPTIONS);
+  }
+
+  updateUser(user: User):Observable<User> {
+    console.log('In UserService.updateUser()');
+    const json = JSON.stringify(user);
+    console.log(user);
+    return this.http.put<User>(environment.apiUrl + 'users', json, HTTP_OPTIONS);
   }
 
   // loginUser(creds: string[]): Observable<User> {
