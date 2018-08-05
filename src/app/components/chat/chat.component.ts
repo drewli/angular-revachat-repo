@@ -184,4 +184,12 @@ export class ChatComponent implements OnInit {
     this.socketService.send(message);
   }
 
+  toScroll() {
+    const chatList = document.getElementById('chat-list');
+    if (chatList.offsetHeight + chatList.scrollTop + 64 >= chatList.scrollHeight) {
+      return chatList.scrollHeight;
+    }
+    return chatList.scrollTop;
+  }
+
 }

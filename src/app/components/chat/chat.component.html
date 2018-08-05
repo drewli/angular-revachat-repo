@@ -3,7 +3,7 @@
 </button> -->
 <div class="chat-container">
   <mat-card class="main-card">
-    <ol id="chat-list" class="chat-list" #scrollMe [scrollTop]="scrollMe.scrollHeight">
+    <ol id="chat-list" class="chat-list" #scrollMe [scrollTop]="toScroll()">
       <mat-list *ngFor="let message of channelMessages" dense>
           <mat-list-item class="chat-message-body" fxLayoutAlign="" dir="ltl">
               <div matLine>
