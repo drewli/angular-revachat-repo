@@ -11,6 +11,10 @@ import { ChannelMembershipService } from '../../services/channel-membership.serv
 import { ChannelMembership } from '../../models/channel-membership';
 import { DialogErrorComponent } from '../dialog-error/dialog-error.component';
 import { catchError } from 'rxjs/operators';
+import { SocketService } from '../../services/socket.service';
+import { Router } from '@angular/router';
+import { TargetLocator } from 'selenium-webdriver';
+import { ProxyClass } from '@angular/compiler';
 
 @Component({
   selector: 'app-channel-menu',
@@ -22,6 +26,7 @@ export class ChannelMenuComponent implements OnInit {
   user: User;
   channels: Channel[];
   channelMemberships: ChannelMembership[];
+  userChannels: Channel[] = [];
   dialogRef: MatDialogRef<DialogChannelComponent> | null;
   dialogErrorRef: MatDialogRef<DialogErrorComponent> | null;
 
@@ -33,34 +38,49 @@ export class ChannelMenuComponent implements OnInit {
     }
   };
 
-  // privateParams = {
-  //   data: {
-  //     title: 'New Direct Message',
-  //     channelType: DialogChannelType.PRIVATE,
-  //     creator: this.user
-  //   }
-  // };
-
   constructor(
     private channelService: ChannelService,
     private userService: UserService,
     private membershipService: ChannelMembershipService,
+    private socketService: SocketService,
+    private router: Router,
     public dialog: MatDialog
   ) { }
 
   ngOnInit() {
-    this.channelService.allChannels.subscribe(channels => {
-      this.channels = channels;
-    });
-
-    if (sessionStorage.length) {
-      this.user = JSON.parse(sessionStorage.getItem('user'));
-    }
+    this.user = JSON.parse(sessionStorage.getItem('user'));
 
     this.membershipService.channelMemberships.subscribe(memberships => {
       this.channelMemberships = memberships;
+      this.userChannels = [];
+
+      this.channelMemberships.forEach(
+        membership => {
+          console.log(membership);
+          if (membership.channelUserId === this.user.userId) {
+            const sameChannel = this.userChannels.filter(
+              channel => {
+                return channel.channelId === membership.channelId;
+              }
+            );
+
+            if (!sameChannel.length) {
+              this.channelService.getChannelById(membership.channelId).subscribe(
+                channel => {
+                  this.userChannels.push(channel);
+                }
+              );
+            }
+          }
+        }
+      );
     });
     this.membershipService.loadChannelMemberships();
+
+    this.channelService.allChannels.subscribe(channels => {
+      this.channels = channels;
+    });
+    this.channelService.loadChannels();
   }
 
   openChannelPopup(params: any) {
@@ -133,6 +153,7 @@ export class ChannelMenuComponent implements OnInit {
   }
 
   changeChannel(channelId: number) {
+    console.log(channelId);
     if (channelId === -1) {
       this.channelService.channel.next(this.channelService.generalChat);
       return;
@@ -147,6 +168,11 @@ export class ChannelMenuComponent implements OnInit {
     this.channelService.channel.next(newChannel);
   }
 
+  logout() {
+    sessionStorage.clear();
+    this.socketService.disconnect();
+    this.router.navigate(['login']);
+  }
 }
 
 

@@ -38,6 +38,11 @@ export class ChannelService {
     });
   }
 
+  getChannelById(id: number): Observable<Channel> {
+    console.log('[LOG] - In ChannelService.getChannelById()');
+    return this.http.get<Channel>(environment.apiUrl + `channels/${id}`, HTTP_OPTIONS);
+  }
+
   private handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
