@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 import { User } from '../../models/user';
-import { CognitoIdToken } from 'amazon-cognito-identity-js';
+// import { CognitoIdToken } from 'amazon-cognito-identity-js';
+
+const AVATAR_URL = 'https://api.adorable.io/avatars/';
 
 @Component({
   selector: 'app-login',
@@ -33,6 +35,10 @@ export class LoginComponent implements OnInit {
     });
 
     this.userService.loadUsers();
+  }
+
+  private getRandomId(): number {
+    return Math.floor(Math.random() * (1000000)) + 1;
   }
 
   login() {
@@ -76,6 +82,7 @@ export class LoginComponent implements OnInit {
             user.lastName = payload['family_name'];
             user.username = payload['preferred_username'];
             user.email = payload['email'];
+            user.userAvatar = `${AVATAR_URL}/${this.getRandomId()}.png`;
 
             this.userService.registerUser(user).subscribe(result => {
               console.log('      - Result');
@@ -90,6 +97,7 @@ export class LoginComponent implements OnInit {
           }
         } else {
           console.log('      - User is already in database');
+          console.log(sameEmail[0].userId);
           sessionStorage.setItem('user', JSON.stringify(sameEmail[0]));
           this.router.navigate(['chat']);
         }
