@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { User } from '../../models/user';
 import { Action } from '../../models/action';
 import { Message } from '../../models/message';
@@ -15,7 +15,7 @@ import { MessageService } from '../../services/message.service';
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, OnDestroy {
   action = Action;
   user: User;
   allUsers = {};
@@ -39,7 +39,7 @@ export class ChatComponent implements OnInit {
       this.router.navigate(['login']);
     }
 
-    this.initIoConnection();
+    this.channelService.channel.next(this.channelService.generalChat);
 
     this.user = JSON.parse(sessionStorage.getItem('user'));
     console.log(this.user);
@@ -47,10 +47,13 @@ export class ChatComponent implements OnInit {
     this.userService.allUsers.subscribe(users => {
       users.forEach(
         user => {
-          this.allUsers[user.userId] = user;
+          if (!this.allUsers[user.userId]) {
+            this.allUsers[user.userId] = user;
+          }
         }
       );
     });
+    this.userService.loadUsers();
 
     this.channelService.channel.subscribe(channel => {
       this.channel = channel;
@@ -97,6 +100,22 @@ export class ChatComponent implements OnInit {
       }
     });
     this.messageService.loadMessages();
+
+    this.initIoConnection();
+  }
+
+  ngOnDestroy() {
+    // if (!!this.userService.allUsers) {
+    //   this.userService.allUsers.unsubscribe();
+    // }
+
+    // if (!!this.channelService.channel) {
+    //   this.channelService.channel.unsubscribe();
+    // }
+
+    // if (!!this.messageService.messages) {
+    //   this.messageService.messages.unsubscribe();
+    // }
   }
 
   private initIoConnection(): void {
@@ -192,4 +211,7 @@ export class ChatComponent implements OnInit {
     return chatList.scrollTop;
   }
 
+  private getRandomAvatar(): string {
+    return `https://api.adorable.io/avatars/${Math.floor(Math.random() * (1000000)) + 1}`;
+  }
 }
