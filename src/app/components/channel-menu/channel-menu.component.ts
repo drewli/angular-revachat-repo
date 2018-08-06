@@ -42,6 +42,8 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
   dialogViewInviteRef: MatDialogRef<DialogViewInviteComponent> | null;
   dialogDirectMessageRef: MatDialogRef<DialogDirectMessageComponent> | null;
   dialogAccountRef: MatDialogRef<DialogAccountComponent> | null;
+  sentinel = false;
+  sentinel2 = false;
 
   publicParams = {
     data: {
@@ -82,7 +84,23 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
     this.userService.loadUsers();
 
     this.membershipService.channelMemberships.subscribe(memberships => {
-      this.channelMemberships = memberships;
+      if (this.sentinel || this.sentinel2) {
+      if (memberships && this.channelMemberships) {
+        let numNew = memberships.length - this.channelMemberships.length;
+        let newMem = memberships.slice(memberships.length - numNew);
+        console.log(newMem);
+        console.log(memberships);
+        console.log(`New Channel Memberships: ${numNew}`);
+        this.channelMemberships.concat(newMem);
+        newMem.forEach(
+          mem => {
+            this.channelMemberships.push(mem);
+          }
+        );
+      } else {
+        this.channelMemberships = memberships;
+      }
+      // this.channelMemberships = memberships;
       this.userDirectMessages = [];
       // this.userChannels = [];
 
@@ -126,6 +144,12 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
           }
         }
       );
+      }
+      if (this.sentinel2) {
+        this.sentinel2 = !this.sentinel2;
+      } else {
+        this.sentinel = !this.sentinel;
+      }
     });
     this.membershipService.loadChannelMemberships();
 
@@ -285,6 +309,7 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
   }
 
   createChannel(channel: Channel) {
+    this.sentinel2 = true;
     this.channelService.createChannel(channel).subscribe(
       result => {
         if (result) {
@@ -376,6 +401,7 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
 
       this.channelService.createChannel(channel).subscribe(
         result => {
+          this.sentinel2 = true;
           this.channelService.loadChannels();
           channel = result;
           console.log(channel);
