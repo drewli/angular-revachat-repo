@@ -87,7 +87,6 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
             if (!sameChannel.length) {
               this.channelService.getChannelById(membership.channelId).subscribe(
                 channel => {
-                  console.log(channel.isDirectMessaging);
                   if (channel.isDirectMessaging) {
                     if (channel.isDirectMessaging !== this.user.username) {
                       channel.channelName = channel.isDirectMessaging;
@@ -432,8 +431,6 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
       }
     )[0];
 
-    console.log(membership.channelUserRole);
-
     return !(membership.channelUserRole === 'admin');
   }
 
@@ -479,13 +476,3 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
     this.router.navigate(['login']);
   }
 }
-
-
-// [
-//   {
-//       "channelMembershipId": 2,
-//       "channelUserId": 1,
-//       "channelUserRole": "admin",
-//       "channelId": 1
-//   }
-// ]
