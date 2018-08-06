@@ -84,7 +84,7 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
     this.membershipService.channelMemberships.subscribe(memberships => {
       this.channelMemberships = memberships;
       this.userDirectMessages = [];
-      this.userChannels = [];
+      // this.userChannels = [];
 
       this.channelMemberships.forEach(
         membership => {
