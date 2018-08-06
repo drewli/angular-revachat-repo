@@ -18,6 +18,7 @@ import { DialogViewInviteComponent } from '../dialog-view-invite/dialog-view-inv
 import { Action } from '../../models/action';
 import { Message } from '../../models/message';
 import { DialogDirectMessageComponent } from '../dialog-direct-message/dialog-direct-message.component';
+import { DialogAccountComponent } from '../dialog-account/dialog-account.component';
 
 @Component({
   selector: 'app-channel-menu',
@@ -33,12 +34,14 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
   channelMemberships: ChannelMembership[];
   userChannels: Channel[] = [this.channelService.generalChat];
   userDirectMessages: Channel[] = [];
+  invites: Invite[] = [];
   userInvites: Invite[] = [];
   dialogRef: MatDialogRef<DialogChannelComponent> | null;
   dialogErrorRef: MatDialogRef<DialogErrorComponent> | null;
   dialogInviteRef: MatDialogRef<DialogInviteComponent> | null;
   dialogViewInviteRef: MatDialogRef<DialogViewInviteComponent> | null;
   dialogDirectMessageRef: MatDialogRef<DialogDirectMessageComponent> | null;
+  dialogAccountRef: MatDialogRef<DialogAccountComponent> | null;
 
   publicParams = {
     data: {
@@ -63,6 +66,13 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
     this.user = JSON.parse(sessionStorage.getItem('user'));
 
     this.userService.allUsers.subscribe(users => {
+      users.forEach(
+        user => {
+          if (user.userId === this.user.userId) {
+            this.user = user;
+          }
+        }
+      );
       this.allUsers2 = users.filter(
         user => {
           return user.userId !== this.user.userId;
@@ -131,6 +141,7 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
 
     this.inviteService.invites.subscribe(
       invites => {
+        this.invites = invites;
         this.userInvites = invites.filter(
           invite => {
             return invite.invitedUserId === this.user.userId;
@@ -143,6 +154,15 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.cd.detach();
+  }
+
+  openAccountPopup() {
+    this.dialogAccountRef = this.dialog.open(DialogAccountComponent, {});
+    this.dialogAccountRef.afterClosed().subscribe(
+      result => {
+        this.userService.loadUsers();
+      }
+    );
   }
 
   openChannelPopup(params: any) {
@@ -168,6 +188,7 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
   }
 
   openInvitePopup(channelId: number) {
+    this.inviteService.loadInvites();
     const memberships = this.channelMemberships.filter(
       membership => {
         return membership.channelId === channelId;
@@ -256,6 +277,7 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
       this.inviteService.deleteInvite(invite.inviteId).subscribe(
         result => {
           this.inviteService.loadInvites();
+          this.membershipService.loadChannelMemberships();
         }
       );
     });
@@ -356,8 +378,6 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
           this.channelService.loadChannels();
           channel = result;
           console.log(channel);
-
-          // =============================================== CREATE MEMBERSHIP HERE ===============================================
 
           const membership: ChannelMembership = {
             channelUserId: this.user.userId,
