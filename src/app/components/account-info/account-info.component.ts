@@ -72,7 +72,6 @@ export class AccountInfoComponent implements OnInit {
       this.isValid = false;
     }
     // }
-
     if (this.isValid) {
       this.validateUsername();
     }
