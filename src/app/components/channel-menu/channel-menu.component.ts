@@ -66,6 +66,13 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
     this.user = JSON.parse(sessionStorage.getItem('user'));
 
     this.userService.allUsers.subscribe(users => {
+      users.forEach(
+        user => {
+          if (user.userId === this.user.userId) {
+            this.user = user;
+          }
+        }
+      );
       this.allUsers2 = users.filter(
         user => {
           return user.userId !== this.user.userId;
@@ -151,6 +158,11 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
 
   openAccountPopup() {
     this.dialogAccountRef = this.dialog.open(DialogAccountComponent, {});
+    this.dialogAccountRef.afterClosed().subscribe(
+      result => {
+        this.userService.loadUsers();
+      }
+    );
   }
 
   openChannelPopup(params: any) {

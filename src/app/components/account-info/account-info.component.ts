@@ -33,6 +33,7 @@ export class AccountInfoComponent implements OnInit {
   }
 
   updateAccountInfo() {
+    console.log('update');
     this.message = '';
 
     /* if (!this.validatePassword()) {
@@ -47,7 +48,9 @@ export class AccountInfoComponent implements OnInit {
     if (sameName.length) {
       this.message = 'Another user is already using that username';
     } else {
-      // TODO: Update the info, for database and cognito.
+      console.log(this.user);
+      this.userService.updateUser(this.user).subscribe(user => console.log(user));
+      // TODO: Update the info for cognito.
       this.updatedInfo = true;
     }
   }

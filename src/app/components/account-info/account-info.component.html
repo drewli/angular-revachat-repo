@@ -14,7 +14,7 @@
       <div class="form-group">
         <label for="username">Username</label>
         <input type="text" [(ngModel)]="this.user.username" (blur)="validate()"
-          class="form-control" id="username" placeholder="Enter your desired username" name="usr">
+          class="form-control" id="username" placeholder="Enter your desired username" name="usr" [disabled]="true">
       </div>
 
       <div class="form-group">
@@ -29,11 +29,11 @@
           class="form-control" id="ln" placeholder="Enter your last name" name="ln">
       </div>
 
-      <div class="form-group">
+      <!-- <div class="form-group">
         <label for="password">Password</label>
         <input type="password" [(ngModel)]="this.password" (blur)="validate()" (keyup)="validate()"
           class="form-control" id="password" placeholder="Enter your password" name="pw">
-      </div>
+      </div> -->
 
       <button type="submit" class="btn btn-primary" [disabled]="!isValid" (click)="updateAccountInfo()">Update Account Information</button>
       <br> <br>
