@@ -14,6 +14,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { MatMenuModule } from '@angular/material/menu';
 
 import {
   MatDialog,
@@ -41,6 +42,7 @@ import { DialogInviteComponent } from './components/dialog-invite/dialog-invite.
 import { DialogViewInviteComponent } from './components/dialog-view-invite/dialog-view-invite.component';
 import { DialogDirectMessageComponent } from './components/dialog-direct-message/dialog-direct-message.component';
 import { AccountInfoComponent } from './components/account-info/account-info.component';
+import { DialogAccountComponent } from './components/dialog-account/dialog-account.component';
 
 @NgModule({
   declarations: [
@@ -56,7 +58,8 @@ import { AccountInfoComponent } from './components/account-info/account-info.com
     DialogInviteComponent,
     DialogViewInviteComponent,
     DialogDirectMessageComponent,
-    AccountInfoComponent
+    AccountInfoComponent,
+    DialogAccountComponent
   ],
   imports: [
     BrowserModule,
@@ -74,7 +77,8 @@ import { AccountInfoComponent } from './components/account-info/account-info.com
     MatButtonModule,
     MatDialogModule,
     MatToolbarModule,
-    MatSelectModule
+    MatSelectModule,
+    MatMenuModule
   ],
   providers: [
     CognitoService,
@@ -91,7 +95,8 @@ import { AccountInfoComponent } from './components/account-info/account-info.com
     DialogErrorComponent,
     DialogInviteComponent,
     DialogViewInviteComponent,
-    DialogDirectMessageComponent
+    DialogDirectMessageComponent,
+    DialogAccountComponent
   ]
 })
 export class AppModule { }

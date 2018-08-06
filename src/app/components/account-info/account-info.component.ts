@@ -13,7 +13,7 @@ export class AccountInfoComponent implements OnInit {
   users: User[] = [];
   password: string;
   message: string;
-  isValid: boolean = true;
+  isValid = true;
   updatedInfo = false;
 
   constructor(private userService: UserService, private router: Router) { }
