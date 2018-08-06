@@ -50,6 +50,12 @@ export class LoginComponent implements OnInit {
     this.isValid = true;
     this.message = '';
 
+    if (!this.email || !this.password) {
+      this.message = 'Invalid Credentials';
+      this.disabled = false;
+      return;
+    }
+
     // First get the user's idToken from cognito
     this.userService.signInCognito(this.email, this.password).subscribe(idToken => {
       console.log('[LOG] - User authentication and login');

@@ -39,6 +39,7 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
 import { InviteService } from './services/invite.service';
 import { DialogInviteComponent } from './components/dialog-invite/dialog-invite.component';
 import { DialogViewInviteComponent } from './components/dialog-view-invite/dialog-view-invite.component';
+import { DialogDirectMessageComponent } from './components/dialog-direct-message/dialog-direct-message.component';
 import { AccountInfoComponent } from './components/account-info/account-info.component';
 
 @NgModule({
@@ -54,6 +55,7 @@ import { AccountInfoComponent } from './components/account-info/account-info.com
     DialogErrorComponent,
     DialogInviteComponent,
     DialogViewInviteComponent,
+    DialogDirectMessageComponent,
     AccountInfoComponent
   ],
   imports: [
@@ -88,7 +90,8 @@ import { AccountInfoComponent } from './components/account-info/account-info.com
     DialogChannelComponent,
     DialogErrorComponent,
     DialogInviteComponent,
-    DialogViewInviteComponent
+    DialogViewInviteComponent,
+    DialogDirectMessageComponent
   ]
 })
 export class AppModule { }
