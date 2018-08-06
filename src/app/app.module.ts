@@ -40,6 +40,7 @@ import { InviteService } from './services/invite.service';
 import { DialogInviteComponent } from './components/dialog-invite/dialog-invite.component';
 import { DialogViewInviteComponent } from './components/dialog-view-invite/dialog-view-invite.component';
 import { DialogDirectMessageComponent } from './components/dialog-direct-message/dialog-direct-message.component';
+import { AccountInfoComponent } from './components/account-info/account-info.component';
 
 @NgModule({
   declarations: [
@@ -54,7 +55,8 @@ import { DialogDirectMessageComponent } from './components/dialog-direct-message
     DialogErrorComponent,
     DialogInviteComponent,
     DialogViewInviteComponent,
-    DialogDirectMessageComponent
+    DialogDirectMessageComponent,
+    AccountInfoComponent
   ],
   imports: [
     BrowserModule,
