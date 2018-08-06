@@ -36,9 +36,13 @@ import { ChannelService } from './services/channel.service';
 import { DialogChannelComponent } from './components/dialog-channel/dialog-channel.component';
 import { ChannelMembershipService } from './services/channel-membership.service';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
+<<<<<<< HEAD
 import { InviteService } from './services/invite.service';
 import { DialogInviteComponent } from './components/dialog-invite/dialog-invite.component';
 import { DialogViewInviteComponent } from './components/dialog-view-invite/dialog-view-invite.component';
+=======
+import { AccountInfoComponent } from './components/account-info/account-info.component';
+>>>>>>> 5d03a6f9a5daecec414930341056f45395d2fabf
 
 @NgModule({
   declarations: [
@@ -51,8 +55,12 @@ import { DialogViewInviteComponent } from './components/dialog-view-invite/dialo
     ChannelMenuComponent,
     DialogChannelComponent,
     DialogErrorComponent,
+<<<<<<< HEAD
     DialogInviteComponent,
     DialogViewInviteComponent
+=======
+    AccountInfoComponent
+>>>>>>> 5d03a6f9a5daecec414930341056f45395d2fabf
   ],
   imports: [
     BrowserModule,
