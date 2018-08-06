@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ChannelService } from '../../services/channel.service';
 import { Channel } from '../../models/channel';
 import { User } from '../../models/user';
@@ -11,21 +11,34 @@ import { ChannelMembership } from '../../models/channel-membership';
 import { DialogErrorComponent } from '../dialog-error/dialog-error.component';
 import { SocketService } from '../../services/socket.service';
 import { Router } from '@angular/router';
+import { DialogInviteComponent } from '../dialog-invite/dialog-invite.component';
+import { Invite } from '../../models/invite';
+import { InviteService } from '../../services/invite.service';
+import { DialogViewInviteComponent } from '../dialog-view-invite/dialog-view-invite.component';
+import { Action } from '../../models/action';
+import { Message } from '../../models/message';
+import { DialogDirectMessageComponent } from '../dialog-direct-message/dialog-direct-message.component';
 
 @Component({
   selector: 'app-channel-menu',
   templateUrl: './channel-menu.component.html',
   styleUrls: ['./channel-menu.component.css']
 })
-export class ChannelMenuComponent implements OnInit {
+export class ChannelMenuComponent implements OnInit, OnDestroy {
 
   user: User;
+  allUsers2: User[] = [];
   channel: Channel;
   channels: Channel[];
   channelMemberships: ChannelMembership[];
   userChannels: Channel[] = [this.channelService.generalChat];
+  userDirectMessages: Channel[] = [];
+  userInvites: Invite[] = [];
   dialogRef: MatDialogRef<DialogChannelComponent> | null;
   dialogErrorRef: MatDialogRef<DialogErrorComponent> | null;
+  dialogInviteRef: MatDialogRef<DialogInviteComponent> | null;
+  dialogViewInviteRef: MatDialogRef<DialogViewInviteComponent> | null;
+  dialogDirectMessageRef: MatDialogRef<DialogDirectMessageComponent> | null;
 
   publicParams = {
     data: {
@@ -39,16 +52,27 @@ export class ChannelMenuComponent implements OnInit {
     private channelService: ChannelService,
     private membershipService: ChannelMembershipService,
     private socketService: SocketService,
+    private userService: UserService,
+    private inviteService: InviteService,
     private router: Router,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private cd: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
     this.user = JSON.parse(sessionStorage.getItem('user'));
 
+    this.userService.allUsers.subscribe(users => {
+      this.allUsers2 = users.filter(
+        user => {
+          return user.userId !== this.user.userId;
+        }
+      );
+    });
+    this.userService.loadUsers();
+
     this.membershipService.channelMemberships.subscribe(memberships => {
       this.channelMemberships = memberships;
-      // this.userChannels = [];
 
       this.channelMemberships.forEach(
         membership => {
@@ -62,7 +86,15 @@ export class ChannelMenuComponent implements OnInit {
             if (!sameChannel.length) {
               this.channelService.getChannelById(membership.channelId).subscribe(
                 channel => {
-                  this.userChannels.push(channel);
+                  console.log(channel.isDirectMessaging);
+                  if (channel.isDirectMessaging) {
+                    if (channel.isDirectMessaging !== this.user.username) {
+                      channel.channelName = channel.isDirectMessaging;
+                    }
+                    this.userDirectMessages.push(channel);
+                  } else {
+                    this.userChannels.push(channel);
+                  }
                 }
               );
             }
@@ -96,6 +128,21 @@ export class ChannelMenuComponent implements OnInit {
         this.channel = channel;
       }
     );
+
+    this.inviteService.invites.subscribe(
+      invites => {
+        this.userInvites = invites.filter(
+          invite => {
+            return invite.invitedUserId === this.user.userId;
+          }
+        );
+      }
+    );
+    this.inviteService.loadInvites();
+  }
+
+  ngOnDestroy() {
+    this.cd.detach();
   }
 
   openChannelPopup(params: any) {
@@ -106,7 +153,7 @@ export class ChannelMenuComponent implements OnInit {
       }
 
       const channel: Channel = {
-        isDirectMessaging: (paramsDialog.channelType === DialogChannelType.PUBLIC) ? 'false' : 'true',
+        isDirectMessaging: '',
         channelName: paramsDialog.channelName
       };
 
@@ -117,14 +164,100 @@ export class ChannelMenuComponent implements OnInit {
 
       console.log(channel);
       this.createChannel(channel);
+    });
+  }
 
-      // this.user.name = paramsDialog.username;
-      // if (paramsDialog.dialogType === DialogUserType.NEW) {
-      //   this.initIoConnection();
-      //   this.sendNotification(paramsDialog, Action.JOINED);
-      // } else if (paramsDialog.dialogType === DialogUserType.EDIT) {
-      //   this.sendNotification(paramsDialog, Action.RENAME);
-      // }
+  openInvitePopup(channelId: number) {
+    const memberships = this.channelMemberships.filter(
+      membership => {
+        return membership.channelId === channelId;
+      }
+    );
+
+    const members = [];
+    memberships.forEach(
+      membership => {
+        members.push(membership.channelUserId);
+      }
+    );
+
+    const eligible: User[] = this.allUsers2.filter(
+      user => {
+        return !members.includes(user.userId);
+      }
+    );
+
+    const params = {
+      data: {
+        channelId: channelId,
+        allUsers: eligible
+      }
+    };
+    this.dialogInviteRef = this.dialog.open(DialogInviteComponent, params);
+    this.dialogInviteRef.afterClosed().subscribe(paramsDialog => {
+      if (!paramsDialog) {
+        return;
+      }
+
+      const invite: Invite = {
+        invitedUserId: paramsDialog.userId,
+        inviteChannelId: this.channel.channelId
+      };
+
+      if (!invite.invitedUserId) {
+        console.log('[LOG] - No user selected');
+        return;
+      }
+
+      console.log(invite);
+      this.inviteService.createInvite(invite).subscribe(
+        result => {
+          console.log(result);
+          this.sendNotification({invitedUserId: invite.invitedUserId}, Action.INVITE);
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    });
+  }
+
+  viewInvite(invite: Invite) {
+    const inviteChannel = this.channels.filter(
+      channel => {
+        return channel.channelId === invite.inviteChannelId;
+      }
+    )[0];
+    const params = {
+      data: {
+        channelName: inviteChannel.channelName
+      }
+    };
+    this.dialogViewInviteRef = this.dialog.open(DialogViewInviteComponent, params);
+    this.dialogViewInviteRef.afterClosed().subscribe(paramsDialog => {
+      if (!paramsDialog) {
+        return;
+      }
+
+      if (paramsDialog['accepted']) {
+        const membership: ChannelMembership = {
+          channelUserId: invite.invitedUserId,
+          channelId: invite.inviteChannelId,
+          channelUserRole: 'user'
+        };
+
+        this.membershipService.createChannelMembership(membership).subscribe(
+          result => {
+            this.membershipService.loadChannelMemberships();
+          }
+        );
+      }
+
+      this.inviteService.deleteInvite(invite.inviteId).subscribe(
+        result => {
+          this.inviteService.loadInvites();
+        }
+      );
     });
   }
 
@@ -167,6 +300,99 @@ export class ChannelMenuComponent implements OnInit {
     this.dialogErrorRef = this.dialog.open(DialogErrorComponent, params);
   }
 
+  openDMPopup() {
+    const currentDM = [];
+
+    this.userDirectMessages.forEach(
+      channel => {
+        currentDM.push(channel.channelId);
+      }
+    );
+
+    const currentDMUsers = [];
+
+    this.channelMemberships.forEach(
+      membership => {
+        if (currentDM.includes(membership.channelId)) {
+          currentDMUsers.push(membership.channelUserId);
+        }
+      }
+    );
+
+    const eligibleUsers = this.allUsers2.filter(
+      user => {
+        return !currentDMUsers.includes(user.userId) && user.userId !== this.user.userId;
+      }
+    );
+
+    const params = {
+      data: {
+        allUsers: eligibleUsers
+      }
+    };
+
+    this.dialogDirectMessageRef = this.dialog.open(DialogDirectMessageComponent, params);
+    this.dialogDirectMessageRef.afterClosed().subscribe(paramsDialog => {
+      if (!paramsDialog) {
+        return;
+      }
+
+      const user = eligibleUsers.filter(
+        u => {
+          return u.userId === parseInt(paramsDialog.userId);
+        }
+      )[0];
+
+      console.log(user);
+
+      let channel: Channel = {
+        isDirectMessaging: this.user.username,
+        channelName: user.username
+      };
+      console.log(channel);
+
+      this.channelService.createChannel(channel).subscribe(
+        result => {
+          this.channelService.loadChannels();
+          channel = result;
+          console.log(channel);
+
+          // =============================================== CREATE MEMBERSHIP HERE ===============================================
+
+          const membership: ChannelMembership = {
+            channelUserId: this.user.userId,
+            channelId: channel.channelId,
+            channelUserRole: 'user'
+          };
+
+          this.membershipService.createChannelMembership(membership).subscribe(
+            result => {
+              this.membershipService.loadChannelMemberships();
+              console.log(result);
+
+              const invite: Invite = {
+                invitedUserId: user.userId,
+                inviteChannelId: channel.channelId
+              };
+
+              console.log(invite);
+
+              this.inviteService.createInvite(invite).subscribe(
+                result => {
+                  console.log(result);
+                  this.sendNotification({invitedUserId: invite.invitedUserId}, Action.INVITE);
+                },
+                error => {
+                  console.log(error);
+                }
+              );
+            }
+          );
+        }
+      );
+    });
+  }
+
   changeChannel(channelId: number) {
     console.log(channelId);
     if (channelId === -1) {
@@ -188,6 +414,62 @@ export class ChannelMenuComponent implements OnInit {
       return 'primary';
     }
     return 'accent';
+  }
+
+  isDisabled(): boolean {
+    if (this.channel.channelId === -1) {
+      return true;
+    }
+
+    if (this.channel.isDirectMessaging) {
+      return true;
+    }
+
+    const membership = this.channelMemberships.filter(
+      mem => {
+        return mem.channelUserId === this.user.userId && mem.channelId === this.channel.channelId;
+      }
+    )[0];
+
+    console.log(membership.channelUserRole);
+
+    return !(membership.channelUserRole === 'admin');
+  }
+
+  public sendNotification(params: any, action: Action): void {
+    console.log('[LOG] - In ChannelMenuComponent.sendNotification()');
+    let message: Message;
+
+    if (action === Action.INVITE) {
+      message = {
+        messageChannelId: -2,
+        messageContent: params.invitedUserId,
+        messageSenderId: this.user.userId,
+        messageTimestamp: new Date(),
+        action: Action.INVITE
+      };
+    }
+
+    // if (action === Action.JOINED) { 
+    //   message = {
+    //     id: 0,
+    //     content: `${this.user.username} ${action}`,
+    //     sender: this.user.id,
+    //     channel: 1,
+    //     timestamp: new Date()
+    //   };
+    // }
+    // else if (action === Action.RENAME) {
+    //   message = {
+    //     action: action,
+    //     content: {
+    //       username: this.user.name,
+    //       previousUsername: params.previousUsername
+    //     }
+    //   };
+    // }
+
+    this.socketService.send(message);
   }
 
   logout() {
