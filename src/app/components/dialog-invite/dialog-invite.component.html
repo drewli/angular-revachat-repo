@@ -1,0 +1,15 @@
+<h2 mat-dialog-title>Invite</h2>
+
+<mat-dialog-content>
+  <mat-form-field>
+    <!-- <input matInput
+    #textField
+    placeholder="Channel Name"
+    (keyup.enter)="onSave(textField.value)">
+    <mat-hint>Enter the name of your channel</mat-hint> -->
+    <mat-select #select>
+      <mat-option *ngFor="let user of allUsers" value="{{user.userId}}">{{user.username}}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <button mat-raised-button color="primary" mat-dialog-close (click)="onSave(select.value)">Invite</button>
+</mat-dialog-content>

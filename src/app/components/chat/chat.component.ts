@@ -9,6 +9,7 @@ import { UserService } from '../../services/user.service';
 import { Channel } from '../../models/channel';
 import { ChannelService } from '../../services/channel.service';
 import { MessageService } from '../../services/message.service';
+import { InviteService } from '../../services/invite.service';
 
 @Component({
   selector: 'app-chat',
@@ -31,6 +32,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private channelService: ChannelService,
     private messageService: MessageService,
+    private inviteService: InviteService,
     private cd: ChangeDetectorRef
   ) { }
 
@@ -124,6 +126,19 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.ioConnection = this.socketService.onMessage()
       .subscribe((message: Message) => {
+        // Is it a notification?
+        if (message.messageChannelId === -2) {
+          // Is it for us?
+          if (parseInt(message.messageContent) === this.user.userId) {
+            // Is it an invitation to another channel?
+            if (message.action === Action.INVITE) {
+              // Reload invites and channels
+              this.channelService.loadChannels();
+              this.inviteService.loadInvites();
+            }
+          }
+        }
+
         if (message.messageChannelId !== -1) {
           this.messages.push(message);
         }
@@ -175,32 +190,6 @@ export class ChatComponent implements OnInit, OnDestroy {
       console.log(result);
     });
 
-  }
-
-  public sendNotification(params: any, action: Action): void {
-    console.log('[LOG] - In ChatComponent.sendNotification()');
-    let message: Message;
-
-    // if (action === Action.JOINED) {
-    //   message = {
-    //     id: 0,
-    //     content: `${this.user.username} ${action}`,
-    //     sender: this.user.id,
-    //     channel: 1,
-    //     timestamp: new Date()
-    //   };
-    // }
-    // else if (action === Action.RENAME) {
-    //   message = {
-    //     action: action,
-    //     content: {
-    //       username: this.user.name,
-    //       previousUsername: params.previousUsername
-    //     }
-    //   };
-    // }
-
-    this.socketService.send(message);
   }
 
   toScroll() {

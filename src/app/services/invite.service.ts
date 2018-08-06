@@ -20,14 +20,14 @@ export class InviteService {
   constructor(private http: HttpClient) { }
 
   createInvite(invite: Invite): Observable<Invite> {
-    console.log('[LOG] - In InviteService.createChannelMembership()');
+    console.log('[LOG] - In InviteService.createInvite()');
     const json = JSON.stringify(invite);
     return this.http.post<Invite>(environment.apiUrl + 'invites', json, HTTP_OPTIONS);
   }
 
   loadInvites() {
     console.log('[LOG] - In InviteService.loadInvites()');
-    this.http.get<Invite[]>(environment.apiUrl + 'invite', HTTP_OPTIONS).subscribe(
+    this.http.get<Invite[]>(environment.apiUrl + 'invites', HTTP_OPTIONS).subscribe(
       invitesVariable => {
         this.invites.next(invitesVariable);
       }

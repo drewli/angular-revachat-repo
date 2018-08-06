@@ -1,6 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-dialog-channel',
@@ -8,7 +7,6 @@ import { FormControl, Validators } from '@angular/forms';
   styleUrls: ['./dialog-channel.component.css']
 })
 export class DialogChannelComponent implements OnInit {
-  channelNameFormControl = new FormControl('', Validators.required);
 
   constructor(public dialogRef: MatDialogRef<DialogChannelComponent>,
     @Inject(MAT_DIALOG_DATA) public params: any) { }

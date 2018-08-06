@@ -3,5 +3,6 @@ export enum Action {
     LEFT,
     RENAME,
     NEW_USER,
-    NEW_CHANNEL
+    NEW_CHANNEL,
+    INVITE
 }

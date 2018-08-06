@@ -11,6 +11,12 @@ import { ChannelMembership } from '../../models/channel-membership';
 import { DialogErrorComponent } from '../dialog-error/dialog-error.component';
 import { SocketService } from '../../services/socket.service';
 import { Router } from '@angular/router';
+import { DialogInviteComponent } from '../dialog-invite/dialog-invite.component';
+import { Invite } from '../../models/invite';
+import { InviteService } from '../../services/invite.service';
+import { DialogViewInviteComponent } from '../dialog-view-invite/dialog-view-invite.component';
+import { Action } from '../../models/action';
+import { Message } from '../../models/message';
 
 @Component({
   selector: 'app-channel-menu',
@@ -20,12 +26,16 @@ import { Router } from '@angular/router';
 export class ChannelMenuComponent implements OnInit {
 
   user: User;
+  allUsers2: User[] = [];
   channel: Channel;
   channels: Channel[];
   channelMemberships: ChannelMembership[];
   userChannels: Channel[] = [this.channelService.generalChat];
+  userInvites: Invite[] = [];
   dialogRef: MatDialogRef<DialogChannelComponent> | null;
   dialogErrorRef: MatDialogRef<DialogErrorComponent> | null;
+  dialogInviteRef: MatDialogRef<DialogInviteComponent> | null;
+  dialogViewInviteRef: MatDialogRef<DialogViewInviteComponent> | null;
 
   publicParams = {
     data: {
@@ -39,6 +49,8 @@ export class ChannelMenuComponent implements OnInit {
     private channelService: ChannelService,
     private membershipService: ChannelMembershipService,
     private socketService: SocketService,
+    private userService: UserService,
+    private inviteService: InviteService,
     private router: Router,
     public dialog: MatDialog
   ) { }
@@ -46,9 +58,17 @@ export class ChannelMenuComponent implements OnInit {
   ngOnInit() {
     this.user = JSON.parse(sessionStorage.getItem('user'));
 
+    this.userService.allUsers.subscribe(users => {
+      this.allUsers2 = users.filter(
+        user => {
+          return user.userId !== this.user.userId;
+        }
+      );
+    });
+    this.userService.loadUsers();
+
     this.membershipService.channelMemberships.subscribe(memberships => {
       this.channelMemberships = memberships;
-      // this.userChannels = [];
 
       this.channelMemberships.forEach(
         membership => {
@@ -96,6 +116,17 @@ export class ChannelMenuComponent implements OnInit {
         this.channel = channel;
       }
     );
+
+    this.inviteService.invites.subscribe(
+      invites => {
+        this.userInvites = invites.filter(
+          invite => {
+            return invite.invitedUserId === this.user.userId;
+          }
+        );
+      }
+    );
+    this.inviteService.loadInvites();
   }
 
   openChannelPopup(params: any) {
@@ -117,14 +148,100 @@ export class ChannelMenuComponent implements OnInit {
 
       console.log(channel);
       this.createChannel(channel);
+    });
+  }
 
-      // this.user.name = paramsDialog.username;
-      // if (paramsDialog.dialogType === DialogUserType.NEW) {
-      //   this.initIoConnection();
-      //   this.sendNotification(paramsDialog, Action.JOINED);
-      // } else if (paramsDialog.dialogType === DialogUserType.EDIT) {
-      //   this.sendNotification(paramsDialog, Action.RENAME);
-      // }
+  openInvitePopup(channelId: number) {
+    const memberships = this.channelMemberships.filter(
+      membership => {
+        return membership.channelId === channelId;
+      }
+    );
+
+    const members = [];
+    memberships.forEach(
+      membership => {
+        members.push(membership.channelUserId);
+      }
+    );
+
+    const eligible: User[] = this.allUsers2.filter(
+      user => {
+        return !members.includes(user.userId);
+      }
+    );
+
+    const params = {
+      data: {
+        channelId: channelId,
+        allUsers: eligible
+      }
+    };
+    this.dialogInviteRef = this.dialog.open(DialogInviteComponent, params);
+    this.dialogInviteRef.afterClosed().subscribe(paramsDialog => {
+      if (!paramsDialog) {
+        return;
+      }
+
+      const invite: Invite = {
+        invitedUserId: paramsDialog.userId,
+        inviteChannelId: this.channel.channelId
+      };
+
+      if (!invite.invitedUserId) {
+        console.log('[LOG] - No user selected');
+        return;
+      }
+
+      console.log(invite);
+      this.inviteService.createInvite(invite).subscribe(
+        result => {
+          console.log(result);
+          this.sendNotification({invitedUserId: invite.invitedUserId}, Action.INVITE);
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    });
+  }
+
+  viewInvite(invite: Invite) {
+    const inviteChannel = this.channels.filter(
+      channel => {
+        return channel.channelId === invite.inviteChannelId;
+      }
+    )[0];
+    const params = {
+      data: {
+        channelName: inviteChannel.channelName
+      }
+    };
+    this.dialogViewInviteRef = this.dialog.open(DialogViewInviteComponent, params);
+    this.dialogViewInviteRef.afterClosed().subscribe(paramsDialog => {
+      if (!paramsDialog) {
+        return;
+      }
+
+      if (paramsDialog['accepted']) {
+        const membership: ChannelMembership = {
+          channelUserId: invite.invitedUserId,
+          channelId: invite.inviteChannelId,
+          channelUserRole: 'user'
+        };
+
+        this.membershipService.createChannelMembership(membership).subscribe(
+          result => {
+            this.membershipService.loadChannelMemberships();
+          }
+        );
+      }
+
+      this.inviteService.deleteInvite(invite.inviteId).subscribe(
+        result => {
+          this.inviteService.loadInvites();
+        }
+      );
     });
   }
 
@@ -188,6 +305,42 @@ export class ChannelMenuComponent implements OnInit {
       return 'primary';
     }
     return 'accent';
+  }
+
+  public sendNotification(params: any, action: Action): void {
+    console.log('[LOG] - In ChannelMenuComponent.sendNotification()');
+    let message: Message;
+
+    if (action === Action.INVITE) {
+      message = {
+        messageChannelId: -2,
+        messageContent: params.invitedUserId,
+        messageSenderId: this.user.userId,
+        messageTimestamp: new Date(),
+        action: Action.INVITE
+      };
+    }
+
+    // if (action === Action.JOINED) { 
+    //   message = {
+    //     id: 0,
+    //     content: `${this.user.username} ${action}`,
+    //     sender: this.user.id,
+    //     channel: 1,
+    //     timestamp: new Date()
+    //   };
+    // }
+    // else if (action === Action.RENAME) {
+    //   message = {
+    //     action: action,
+    //     content: {
+    //       username: this.user.name,
+    //       previousUsername: params.previousUsername
+    //     }
+    //   };
+    // }
+
+    this.socketService.send(message);
   }
 
   logout() {

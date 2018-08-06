@@ -1,0 +1,7 @@
+<h2 mat-dialog-title>View Invite</h2>
+
+<mat-dialog-content>
+  <p>You have been invited to join {{channelName}}</p>
+  <button mat-raised-button color="primary" mat-dialog-close (click)="onSave(true)">Accept</button>
+  <button mat-raised-button color="accent" mat-dialog-close (click)="onSave(false)">Deny</button>
+</mat-dialog-content>
