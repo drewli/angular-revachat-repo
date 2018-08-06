@@ -13,8 +13,9 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
 
-import { 
+import {
   MatDialog,
   MatToolbarModule,
 } from '@angular/material';
@@ -35,6 +36,9 @@ import { ChannelService } from './services/channel.service';
 import { DialogChannelComponent } from './components/dialog-channel/dialog-channel.component';
 import { ChannelMembershipService } from './services/channel-membership.service';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
+import { InviteService } from './services/invite.service';
+import { DialogInviteComponent } from './components/dialog-invite/dialog-invite.component';
+import { DialogViewInviteComponent } from './components/dialog-view-invite/dialog-view-invite.component';
 import { AccountInfoComponent } from './components/account-info/account-info.component';
 
 @NgModule({
@@ -48,6 +52,8 @@ import { AccountInfoComponent } from './components/account-info/account-info.com
     ChannelMenuComponent,
     DialogChannelComponent,
     DialogErrorComponent,
+    DialogInviteComponent,
+    DialogViewInviteComponent,
     AccountInfoComponent
   ],
   imports: [
@@ -65,20 +71,24 @@ import { AccountInfoComponent } from './components/account-info/account-info.com
     MatButtonToggleModule,
     MatButtonModule,
     MatDialogModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatSelectModule
   ],
   providers: [
     CognitoService,
     SocketService,
     UserService,
     ChannelService,
+    InviteService,
     MatDialog,
     ChannelMembershipService
   ],
   bootstrap: [AppComponent],
   entryComponents: [
     DialogChannelComponent,
-    DialogErrorComponent
+    DialogErrorComponent,
+    DialogInviteComponent,
+    DialogViewInviteComponent
   ]
 })
 export class AppModule { }
