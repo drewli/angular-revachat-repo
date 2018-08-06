@@ -3,3 +3,24 @@
 /* @import '~@angular/material/prebuilt-themes/deeppurple-amber.css'; */
 /* @import '~@angular/material/prebuilt-themes/pink-bluegrey.css'; */
 /* @import '~@angular/material/prebuilt-themes/purple-green.css'; */
+
+
+
+.mat-raised-button.mat-accent{
+background-color: #909090;
+
+
+}
+
+.bg-light{
+background-color: white !important;
+}
+
+.mat-sidenav{
+
+    color: #8fc3ea
+}
+
+.jumbotron{
+    background-color: #8fc3ea !important
+}
