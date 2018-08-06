@@ -24,6 +24,7 @@ export class CognitoService {
     };
 
     this.userPool = new AWSCognito.CognitoUserPool(poolData);
+    
   }
 
   registerUser(email: string, username: string, password: string, fn: string, ln: string) {

@@ -49,6 +49,10 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.userService.allUsers.subscribe(users => {
       users.forEach(
         user => {
+          if (user.userId === this.user.userId) {
+            this.user = user;
+          }
+
           if (!this.allUsers[user.userId]) {
             this.allUsers[user.userId] = user;
           }

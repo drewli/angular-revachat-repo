@@ -1,4 +1,18 @@
 <mat-list dense>
+    <mat-list-item class="chat-message-body" fxLayoutAlign="" dir="ltl">
+        <div matLine>
+            <!-- <b>{{this.user.username}}</b> -->
+            <button mat-button [matMenuTriggerFor]="menu"><b>{{this.user.username}}</b></button>
+            <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="openAccountPopup()">Account</button>
+                <button mat-menu-item (click)="logout()">Logout</button>
+            </mat-menu>
+        </div>
+        <img matListAvatar class="img-box" src="{{this.user.userAvatar}}" alt="...">
+    </mat-list-item>
+</mat-list>
+<br>
+<mat-list dense>
     <mat-list-item>
         <h6 matSubHeader>Channels</h6>
     </mat-list-item>
