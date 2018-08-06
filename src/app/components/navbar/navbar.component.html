@@ -11,9 +11,8 @@
 				</button>
 				<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 					<div class="navbar-nav">
-						<a *ngIf="this.user == null" class="nav-item nav-link" id="toLogin" routerLink="login">Login</a>
-						<a *ngIf="this.user == null" class="nav-item nav-link" id="toRegister" routerLink="register">Register</a>
-						<a *ngIf="this.user != null" class="nav-item nav-link" id="toLogout" (click)="logout()" routerLink="" >Logout</a>
+						<a class="nav-item nav-link" id="toLogin" routerLink="login">Login</a>
+						<a class="nav-item nav-link" id="toRegister" routerLink="register">Register</a>
 					</div>
 				</div>
 			</nav>

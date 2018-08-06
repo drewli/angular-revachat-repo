@@ -6,4 +6,26 @@
         <button mat-raised-button [color]="getColor(channel.channelId)" (click)="changeChannel(channel.channelId)" >{{channel.channelName}}</button>
     </mat-list-item>
     <mat-list-item><button mat-raised-button color="warn" (click)="openChannelPopup(publicParams)" >Create Channel</button></mat-list-item>
+    <mat-list-item><button mat-raised-button color="accent" (click)="openInvitePopup(this.channel.channelId)" [disabled]="isDisabled()" >Invite User</button></mat-list-item>
+</mat-list>
+
+<mat-list dense>
+    <mat-list-item>
+        <h6 matSubHeader>Direct Messages</h6>
+    </mat-list-item>
+    <mat-list-item *ngFor="let channel of userDirectMessages">
+            <button mat-raised-button [color]="getColor(channel.channelId)" (click)="changeChannel(channel.channelId)" >{{channel.channelName}}</button>
+        </mat-list-item>
+    <mat-list-item>
+        <button mat-raised-button color="accent" (click)="openDMPopup()" >New Direct Message</button>
+    </mat-list-item>
+</mat-list>
+
+<mat-list *ngIf="userInvites.length" dense>
+    <mat-list-item>
+        <h6 matSubHeader>Invites</h6>
+    </mat-list-item>
+    <mat-list-item *ngFor="let invite of userInvites">
+        <button mat-raised-button color="accent" (click)="viewInvite(invite)" >New Invite</button>
+    </mat-list-item>
 </mat-list>
