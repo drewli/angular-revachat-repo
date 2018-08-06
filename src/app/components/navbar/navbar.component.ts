@@ -13,13 +13,8 @@ export class NavbarComponent implements OnInit {
 
   user: User;
 
-  constructor(private router: Router,
-    private userService: UserService
-  ) { }
+  constructor(private router: Router) { }
 
   ngOnInit() {
-    if (sessionStorage.length) {
-      this.user = JSON.parse(sessionStorage.getItem('user'));
-    }
   }
 }
