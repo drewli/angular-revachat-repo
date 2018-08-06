@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ChannelService } from '../../services/channel.service';
 import { Channel } from '../../models/channel';
 import { User } from '../../models/user';
@@ -23,7 +23,7 @@ import { Message } from '../../models/message';
   templateUrl: './channel-menu.component.html',
   styleUrls: ['./channel-menu.component.css']
 })
-export class ChannelMenuComponent implements OnInit {
+export class ChannelMenuComponent implements OnInit, OnDestroy {
 
   user: User;
   allUsers2: User[] = [];
@@ -31,6 +31,7 @@ export class ChannelMenuComponent implements OnInit {
   channels: Channel[];
   channelMemberships: ChannelMembership[];
   userChannels: Channel[] = [this.channelService.generalChat];
+  userDirectMessages: Channel[] = [];
   userInvites: Invite[] = [];
   dialogRef: MatDialogRef<DialogChannelComponent> | null;
   dialogErrorRef: MatDialogRef<DialogErrorComponent> | null;
@@ -52,7 +53,8 @@ export class ChannelMenuComponent implements OnInit {
     private userService: UserService,
     private inviteService: InviteService,
     private router: Router,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private cd: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -82,7 +84,11 @@ export class ChannelMenuComponent implements OnInit {
             if (!sameChannel.length) {
               this.channelService.getChannelById(membership.channelId).subscribe(
                 channel => {
-                  this.userChannels.push(channel);
+                  if (channel.isDirectMessaging) {
+                    this.userDirectMessages.push(channel);
+                  } else {
+                    this.userChannels.push(channel);
+                  }
                 }
               );
             }
@@ -127,6 +133,10 @@ export class ChannelMenuComponent implements OnInit {
       }
     );
     this.inviteService.loadInvites();
+  }
+
+  ngOnDestroy() {
+    this.cd.detach();
   }
 
   openChannelPopup(params: any) {
@@ -305,6 +315,22 @@ export class ChannelMenuComponent implements OnInit {
       return 'primary';
     }
     return 'accent';
+  }
+
+  isDisabled(): boolean {
+    if (this.channel.channelId == -1) {
+      return true;
+    }
+
+    const membership = this.channelMemberships.filter(
+      mem => {
+        return mem.channelUserId === this.user.userId && mem.channelId === this.channel.channelId;
+      }
+    )[0];
+
+    console.log(membership.channelUserRole);
+
+    return !(membership.channelUserRole === 'admin');
   }
 
   public sendNotification(params: any, action: Action): void {

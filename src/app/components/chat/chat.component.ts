@@ -107,6 +107,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.cd.detach();
     // if (!!this.userService.allUsers) {
     //   this.userService.allUsers.unsubscribe();
     // }
