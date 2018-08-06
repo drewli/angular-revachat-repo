@@ -4,6 +4,7 @@ import { LoginComponent } from '../components/login/login.component';
 import { RegisterComponent } from '../components/register/register.component';
 import { LandingComponent } from '../components/landing/landing.component';
 import { ChatComponent } from '../components/chat/chat.component';
+import { AccountInfoComponent } from '../components/account-info/account-info.component';
 
 const ROUTES: Routes = [
   {
@@ -22,6 +23,10 @@ const ROUTES: Routes = [
   {
     path: 'landing',
     component: LandingComponent
+  },
+  {
+    path: 'account-info',
+    component: AccountInfoComponent
   },
   {
     path: 'chat',
