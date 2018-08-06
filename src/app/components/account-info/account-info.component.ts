@@ -47,7 +47,8 @@ export class AccountInfoComponent implements OnInit {
     if (sameName.length) {
       this.message = 'Another user is already using that username';
     } else {
-      // TODO: Update the info, for database and cognito.
+      this.userService.updateUser(this.user);
+      // TODO: Update the info for cognito.
       this.updatedInfo = true;
     }
   }
