@@ -39,6 +39,7 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
 import { InviteService } from './services/invite.service';
 import { DialogInviteComponent } from './components/dialog-invite/dialog-invite.component';
 import { DialogViewInviteComponent } from './components/dialog-view-invite/dialog-view-invite.component';
+import { DialogDirectMessageComponent } from './components/dialog-direct-message/dialog-direct-message.component';
 
 @NgModule({
   declarations: [
@@ -52,7 +53,8 @@ import { DialogViewInviteComponent } from './components/dialog-view-invite/dialo
     DialogChannelComponent,
     DialogErrorComponent,
     DialogInviteComponent,
-    DialogViewInviteComponent
+    DialogViewInviteComponent,
+    DialogDirectMessageComponent
   ],
   imports: [
     BrowserModule,
@@ -86,7 +88,8 @@ import { DialogViewInviteComponent } from './components/dialog-view-invite/dialo
     DialogChannelComponent,
     DialogErrorComponent,
     DialogInviteComponent,
-    DialogViewInviteComponent
+    DialogViewInviteComponent,
+    DialogDirectMessageComponent
   ]
 })
 export class AppModule { }

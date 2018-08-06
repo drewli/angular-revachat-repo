@@ -17,6 +17,7 @@ import { InviteService } from '../../services/invite.service';
 import { DialogViewInviteComponent } from '../dialog-view-invite/dialog-view-invite.component';
 import { Action } from '../../models/action';
 import { Message } from '../../models/message';
+import { DialogDirectMessageComponent } from '../dialog-direct-message/dialog-direct-message.component';
 
 @Component({
   selector: 'app-channel-menu',
@@ -37,6 +38,7 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
   dialogErrorRef: MatDialogRef<DialogErrorComponent> | null;
   dialogInviteRef: MatDialogRef<DialogInviteComponent> | null;
   dialogViewInviteRef: MatDialogRef<DialogViewInviteComponent> | null;
+  dialogDirectMessageRef: MatDialogRef<DialogDirectMessageComponent> | null;
 
   publicParams = {
     data: {
@@ -84,7 +86,11 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
             if (!sameChannel.length) {
               this.channelService.getChannelById(membership.channelId).subscribe(
                 channel => {
+                  console.log(channel.isDirectMessaging);
                   if (channel.isDirectMessaging) {
+                    if (channel.isDirectMessaging !== this.user.username) {
+                      channel.channelName = channel.isDirectMessaging;
+                    }
                     this.userDirectMessages.push(channel);
                   } else {
                     this.userChannels.push(channel);
@@ -147,7 +153,7 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
       }
 
       const channel: Channel = {
-        isDirectMessaging: (paramsDialog.channelType === DialogChannelType.PUBLIC) ? 'false' : 'true',
+        isDirectMessaging: '',
         channelName: paramsDialog.channelName
       };
 
@@ -294,6 +300,99 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
     this.dialogErrorRef = this.dialog.open(DialogErrorComponent, params);
   }
 
+  openDMPopup() {
+    const currentDM = [];
+
+    this.userDirectMessages.forEach(
+      channel => {
+        currentDM.push(channel.channelId);
+      }
+    );
+
+    const currentDMUsers = [];
+
+    this.channelMemberships.forEach(
+      membership => {
+        if (currentDM.includes(membership.channelId)) {
+          currentDMUsers.push(membership.channelUserId);
+        }
+      }
+    );
+
+    const eligibleUsers = this.allUsers2.filter(
+      user => {
+        return !currentDMUsers.includes(user.userId) && user.userId !== this.user.userId;
+      }
+    );
+
+    const params = {
+      data: {
+        allUsers: eligibleUsers
+      }
+    };
+
+    this.dialogDirectMessageRef = this.dialog.open(DialogDirectMessageComponent, params);
+    this.dialogDirectMessageRef.afterClosed().subscribe(paramsDialog => {
+      if (!paramsDialog) {
+        return;
+      }
+
+      const user = eligibleUsers.filter(
+        u => {
+          return u.userId === parseInt(paramsDialog.userId);
+        }
+      )[0];
+
+      console.log(user);
+
+      let channel: Channel = {
+        isDirectMessaging: this.user.username,
+        channelName: user.username
+      };
+      console.log(channel);
+
+      this.channelService.createChannel(channel).subscribe(
+        result => {
+          this.channelService.loadChannels();
+          channel = result;
+          console.log(channel);
+
+          // =============================================== CREATE MEMBERSHIP HERE ===============================================
+
+          const membership: ChannelMembership = {
+            channelUserId: this.user.userId,
+            channelId: channel.channelId,
+            channelUserRole: 'user'
+          };
+
+          this.membershipService.createChannelMembership(membership).subscribe(
+            result => {
+              this.membershipService.loadChannelMemberships();
+              console.log(result);
+
+              const invite: Invite = {
+                invitedUserId: user.userId,
+                inviteChannelId: channel.channelId
+              };
+
+              console.log(invite);
+
+              this.inviteService.createInvite(invite).subscribe(
+                result => {
+                  console.log(result);
+                  this.sendNotification({invitedUserId: invite.invitedUserId}, Action.INVITE);
+                },
+                error => {
+                  console.log(error);
+                }
+              );
+            }
+          );
+        }
+      );
+    });
+  }
+
   changeChannel(channelId: number) {
     console.log(channelId);
     if (channelId === -1) {
@@ -318,7 +417,11 @@ export class ChannelMenuComponent implements OnInit, OnDestroy {
   }
 
   isDisabled(): boolean {
-    if (this.channel.channelId == -1) {
+    if (this.channel.channelId === -1) {
+      return true;
+    }
+
+    if (this.channel.isDirectMessaging) {
       return true;
     }
 

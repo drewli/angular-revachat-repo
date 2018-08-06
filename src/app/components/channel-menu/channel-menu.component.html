@@ -13,6 +13,12 @@
     <mat-list-item>
         <h6 matSubHeader>Direct Messages</h6>
     </mat-list-item>
+    <mat-list-item *ngFor="let channel of userDirectMessages">
+            <button mat-raised-button [color]="getColor(channel.channelId)" (click)="changeChannel(channel.channelId)" >{{channel.channelName}}</button>
+        </mat-list-item>
+    <mat-list-item>
+        <button mat-raised-button color="accent" (click)="openDMPopup()" >New Direct Message</button>
+    </mat-list-item>
 </mat-list>
 
 <mat-list *ngIf="userInvites.length" dense>

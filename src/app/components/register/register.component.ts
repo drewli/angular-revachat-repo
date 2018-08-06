@@ -38,6 +38,7 @@ export class RegisterComponent implements OnInit {
 
   register() {
     this.message = '';
+    this.isValid = false;
     const sameEmail = this.users.filter(u => {
       return u.email === this.user.email;
     });
@@ -48,39 +49,21 @@ export class RegisterComponent implements OnInit {
 
     if (sameEmail.length) {
       this.message = 'Another user is already using that email address';
+      this.isValid = true;
     } else if (sameName.length) {
       this.message = 'Another user is already using that username';
+      this.isValid = true;
     } else {
       this.userService.registerCognito(this.user, this.password);
       this.registered = true;
     }
   }
 
-  // register() {
-  //   if (this.role) {
-  //     this.user.role = 2;
-  //   }
-  //   this.userService.registerUser(this.user).subscribe(u => {
-  //     if (u.id === -1) {
-  //       this.isValid = false;
-  //     } else {
-  //       this.userService.subscribers.next(u);
-  //       localStorage.setItem('user', JSON.stringify(u));
-  //       // console.log(`User, ${this.user.username}, successfully registered`);
-  //       this.router.navigate(['landing']);
-  //     }
-  //   });
-  // }
-
   validate() {
     console.log('Validating');
     this.message = '';
     this.isValid = true;
 
-    // if (!this.user.firstName || !this.user.lastName || !this.user.email || !this.user.username || !this.password) {
-    //   this.message = 'Required fields are empty';
-    //   this.isValid = false;
-    // } else {
     if (this.user.firstName.length > 100 || this.user.firstName.length < 1) {
       this.message = 'First name must be between 1 and 100 characters';
       this.isValid = false;
@@ -97,7 +80,6 @@ export class RegisterComponent implements OnInit {
       this.message = 'Password must be 100 characters or less';
       this.isValid = false;
     }
-    // }
 
     if (this.isValid) {
       this.validateUsername();
@@ -158,9 +140,5 @@ export class RegisterComponent implements OnInit {
       this.message = 'Passwords must contain numbers';
       this.isValid = false;
     }
-
-    // if (!regex.test(this.password)) {
-    //   this.
-    // }
   }
 }
