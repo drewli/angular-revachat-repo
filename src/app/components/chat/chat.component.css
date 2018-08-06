@@ -1,0 +1,74 @@
+
+[mat-fab] {
+    position: absolute;
+    right: 2%;
+    top: 35px;
+    z-index: 1;
+}
+
+.chat-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    /* left: 0px; */
+}
+
+.chat-input {
+    /* left:150px; */
+    padding-top: 20px;
+    width: 100%; 
+}
+
+.chat-list {
+    overflow: auto;
+    position: absolute;
+    top: 90px;
+    left: 25px;
+    right: 25px;
+    bottom: 120px;
+}
+
+.chat-list-item {
+    width: 30%;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.main-card {
+    height: 100%;
+}
+
+.chat-footer-container {
+    position:absolute;
+    bottom:25px;
+    left:25px;
+    right:25px;
+}
+
+/* .chat-notification {
+    text-align: center;
+} */
+
+/* .chat {
+    list-style: none;
+    background: none;
+    margin: 0;
+    padding: 0 0 0 0;
+    position: absolute;
+    top:60px;
+    height: 80vh; 
+    width: 100%;
+    overflow-y: scroll;
+    padding-right: 17px;
+} */
+
+.mat-list .mat-list-item .mat-line{
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    font-size: 17px;
+}
+
+.img-box {
+    width: 100px;
+    height: 100px;
+}

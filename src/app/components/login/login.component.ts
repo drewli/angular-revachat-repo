@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 import { User } from '../../models/user';
+// import { CognitoIdToken } from 'amazon-cognito-identity-js';
 
 @Component({
   selector: 'app-login',
@@ -11,52 +12,96 @@ import { User } from '../../models/user';
 export class LoginComponent implements OnInit {
 
   message = '';
-  loggedUser = sessionStorage.getItem('user');
   isValid = true;
-  usr: string;
+  em: string;
   pw: string;
   email: string;
+  password: string;
+  disabled = false;
+  users: User[] = [];
 
-  constructor(private userService: UserService, private router: Router) { }
+  constructor(
+    private userService: UserService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
-    if (this.loggedUser != null) {
+    console.log('[LOG] - In LoginComponent.ngOnInit()');
+    if (sessionStorage.length) {
       this.router.navigate(['landing']);
     }
+
+    this.userService.allUsers.subscribe(users => {
+      this.users = users;
+    });
+
+    this.userService.loadUsers();
   }
 
-  signInCognito() {
-    console.log('[LOG] - In LoginComponent.signInCognito()');
-    this.userService.signInCognito(this.email, this.pw).subscribe(idToken => {
-      if (idToken !== null) {
-        const payload = idToken.decodePayload();
-        console.log(payload);
-        let user = new User();
-        user.id = 0;
-        user.firstName = payload['given_name'];
-        user.lastName = payload['family_name'];
-        user.username = payload['preferred_username'];
-        user.email = payload['email'];
-
-        this.userService.registerUser(user).subscribe(result => {
-          console.log(result);
-        });
-      }
-    });
+  private getRandomAvatar(): string {
+    return `https://api.adorable.io/avatars/${Math.floor(Math.random() * (1000000)) + 1}`;
   }
 
   login() {
     console.log('[LOG] - In LoginComponent.login()');
+    this.disabled = true;
+    this.email = this.em;
+    this.password = this.pw;
     this.isValid = true;
-    this.userService.loginUser([this.email, this.pw]).subscribe(user => {
-      if (user == null || user.id === -1) {
-        console.log('[ERROR] - Invalid credentials');
-        this.isValid = false;
-      } else {
-        this.userService.subscribers.next(user);
-        sessionStorage.setItem('user', JSON.stringify(user));
-        console.log(`[LOG] - User, ${user.username}, successfully logged in!`);
-        this.router.navigate(['landing']);
+    this.message = '';
+
+    // First get the user's idToken from cognito
+    this.userService.signInCognito(this.email, this.password).subscribe(idToken => {
+      console.log('[LOG] - User authentication and login');
+      if (idToken != null) {
+        console.log('      - idToken is not null');
+        const payload = idToken.decodePayload();
+
+        if (!payload['given_name']) {
+          console.log('      - Payload is empty; User does not exist');
+          this.message = 'Invalid Credentials';
+          this.disabled = false;
+          return;
+        }
+
+        console.log('      - Payload is not empty; User exists');
+        // Check if they already exist in our database
+        const sameEmail = this.users.filter(u => {
+          return u.email === this.email;
+        });
+
+        if (!sameEmail.length) {
+          console.log('      - User is not in database');
+          // If they have verified their email address
+          if (payload['email_verified'] === true) {
+            console.log('      - User has verified their email address');
+            console.log('      - Inserting user record into the database');
+
+            // Create the user to insert into our database
+            let user = new User();
+            user.firstName = payload['given_name'];
+            user.lastName = payload['family_name'];
+            user.username = payload['preferred_username'];
+            user.email = payload['email'];
+            user.userAvatar = this.getRandomAvatar();
+
+            this.userService.registerUser(user).subscribe(result => {
+              console.log('      - Result');
+              console.log(result);
+              sessionStorage.setItem('user', JSON.stringify(result));
+              this.router.navigate(['chat']);
+            });
+          } else {
+            console.log('      - User has not verified their email address');
+            this.message = 'Please verify your email address by clicking the link in the email we sent you.';
+            this.disabled = false;
+          }
+        } else {
+          console.log('      - User is already in database');
+          console.log(sameEmail[0].userId);
+          sessionStorage.setItem('user', JSON.stringify(sameEmail[0]));
+          this.router.navigate(['chat']);
+        }
       }
     });
   }

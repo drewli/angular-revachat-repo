@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,19 +11,15 @@ import { User } from '../../models/user';
 })
 export class NavbarComponent implements OnInit {
 
-  loggedUser: User;
+  user: User;
 
-  constructor(private router: Router, private userService: UserService) { }
+  constructor(private router: Router,
+    private userService: UserService
+  ) { }
 
   ngOnInit() {
-    this.userService.subscribers.subscribe(user => {
-      this.loggedUser = user;
-    });
-  }
-
-  logout() {
-    sessionStorage.clear();
-    this.router.navigate(['login']);
-    this.userService.subscribers.next(null);
+    if (sessionStorage.length) {
+      this.user = JSON.parse(sessionStorage.getItem('user'));
+    }
   }
 }

@@ -1,25 +1,26 @@
-<div class="container row">
-  <div class="col-md-8"></div>
-  <div class="col-md-4 col-md-offset-4">
-    
-    <h3>Sign In</h3>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-4">
+      
+      <h3>Sign In</h3>
 
-    <div class="form-group">
-      <label for="email">Email Address</label> <input type="email" [(ngModel)]="this.email"
-        class="form-control" id="email" placeholder="Email Address">
-    </div>
+      <div class="form-group">
+        <label for="email">Email Address</label> <input type="email" [(ngModel)]="this.em"
+          class="form-control" id="email" placeholder="Email Address" (keyup.enter)="login()">
+      </div>
 
-    <div class="form-group">
-      <label for="password">Password</label> <input type="password" [(ngModel)]="this.pw"
-        class="form-control" id="password" placeholder="Password">
-    </div>
+      <div class="form-group">
+        <label for="password">Password</label> <input type="password" [(ngModel)]="this.pw"
+          class="form-control" id="password" placeholder="Password" (keyup.enter)="login()">
+      </div>
 
-    <button type="submit" class="btn btn-primary" (click)="signInCognito()">Login</button>
-    <br> <br>
+      <button type="submit" class="btn btn-primary" (click)="login()" [disabled]="this.disabled">Login</button>
+      <br> <br>
 
-    <div *ngIf="message" class="alert alert-danger">{{message}}</div>
-    <div *ngIf="!isValid" class="alert alert-danger" id="formError">
-        Invalid Credentials!
+      <div *ngIf="message" class="alert alert-danger">{{message}}</div>
+      <div *ngIf="!isValid" class="alert alert-danger" id="formError">
+          Invalid Credentials!
+      </div>
     </div>
   </div>
 </div>

@@ -1,0 +1,31 @@
+<!-- <button mat-fab (click)="onClickUserInfo()">
+  <mat-icon>person</mat-icon>
+</button> -->
+<div class="chat-container">
+  <mat-card class="main-card">
+    <ol id="chat-list" class="chat-list" #scrollMe [scrollTop]="toScroll()">
+      <mat-list *ngFor="let message of channelMessages" dense>
+          <mat-list-item class="chat-message-body" fxLayoutAlign="" dir="ltl">
+              <div matLine>
+                  <b class="username">{{message.from.username}} </b>
+                  <span class="time">{{message.messageTimestamp | date:'shortTime'}} </span>
+              </div>
+              <span matLine class="content"> {{message.messageContent}} </span>
+              <img matListAvatar class="img-box" src="{{message.from.userAvatar}}" alt="...">
+          </mat-list-item>
+      </mat-list>
+    </ol>
+    <div class="chat-footer-container">
+      <!-- <mat-icon>message</mat-icon> -->
+      <mat-form-field class="chat-input">
+        <input matInput 
+               #inputMessage 
+               maxlength="140" 
+               placeholder="Type your message" 
+               [(ngModel)]="messageContent" 
+               (keyup.enter)="sendMessage(messageContent)">
+        <mat-hint align="end">{{inputMessage.value.length}}/140</mat-hint>
+      </mat-form-field>
+    </div>
+  </mat-card>
+</div>

@@ -14,14 +14,13 @@ export class RegisterComponent implements OnInit {
   user = new User();
   users: User[] = [];
   isValid = false;
-  loggedUser = sessionStorage.getItem('user');
   password = '';
   registered = false;
 
   constructor(private userService: UserService, private router: Router) { }
 
   ngOnInit() {
-    if (this.loggedUser != null) {
+    if (sessionStorage.length) {
       this.router.navigate(['landing']);
     }
 
@@ -30,20 +29,32 @@ export class RegisterComponent implements OnInit {
     this.user.lastName = '';
     this.user.email = '';
 
-    // this.loadUsers();
+    this.userService.allUsers.subscribe(users => {
+      this.users = users;
+    });
+
+    this.userService.loadUsers();
   }
 
   register() {
-    this.userService.registerCognito(this.user, this.password);
-    this.registered = true;
-  }
+    this.message = '';
+    const sameEmail = this.users.filter(u => {
+      return u.email === this.user.email;
+    });
 
-  // loadUsers() {
-  //   this.users = [];
-  //   this.userService.getAllUsers().subscribe(u => {
-  //     this.users = u;
-  //   });
-  // }
+    const sameName = this.users.filter(u => {
+      return u.username === this.user.username;
+    })
+
+    if (sameEmail.length) {
+      this.message = 'Another user is already using that email address';
+    } else if (sameName.length) {
+      this.message = 'Another user is already using that username';
+    } else {
+      this.userService.registerCognito(this.user, this.password);
+      this.registered = true;
+    }
+  }
 
   // register() {
   //   if (this.role) {

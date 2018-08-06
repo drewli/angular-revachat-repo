@@ -70,7 +70,6 @@ export class CognitoService {
       }
 
       cognitoUser = result.user;
-      sessionStorage.setItem('cognitoUser', cognitoUser);
       console.log('[LOG] - Created cognito user');
     });
   }
@@ -99,7 +98,7 @@ export class CognitoService {
       },
       onFailure: function(err: any) {
         console.log('[ERROR] - Failed to authenticate user');
-        console.log(err);
+        obs.next(new CognitoIdToken({IdToken: ''}));
       }
     });
 
